@@ -1,0 +1,217 @@
+### ==============================================================================
+### COLLEGE PLACEMENT & RECRUITMENT PORTAL - REST CLIENT REQUESTS
+### ==============================================================================
+### Use with the VS Code "REST Client" extension or any HTTP test runner.
+### ==============================================================================
+
+@baseUrl = http://localhost:5000/api
+
+### Set your JWT tokens here after logging in:
+@adminToken = your_placement_officer_token_here
+@recruiterToken = your_company_recruiter_token_here
+@studentToken = your_student_token_here
+
+### ------------------------------------------------------------------------------
+### 1. HEALTH CHECKS
+### ------------------------------------------------------------------------------
+
+### Root Welcome
+GET http://localhost:5000/
+
+### Health Check
+GET {{baseUrl}}/health
+
+### ------------------------------------------------------------------------------
+### 2. AUTHENTICATION & COMPANY ONBOARDING
+### ------------------------------------------------------------------------------
+
+### 1. Register a new Company (Recruiter) - Registers with is_approved = false
+# @name registerCompany
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Acme Tech Solutions",
+  "email": "hr@acmetech.com",
+  "password": "Password@123",
+  "role": "recruiter"
+}
+
+### 2. Attempt Company Login BEFORE Approval (Should return 403 Forbidden)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "hr@acmetech.com",
+  "password": "Password@123"
+}
+
+### 3. Login Placement Officer (Admin - default seeded account)
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@portal.com",
+  "password": "Admin@123"
+}
+
+### 4. Register a Student (Auto-approved)
+# @name registerStudent
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Rahul Sharma",
+  "email": "rahul.sharma@college.edu",
+  "password": "Password@123",
+  "role": "student"
+}
+
+### 5. Login Student
+# @name loginStudent
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "rahul.sharma@college.edu",
+  "password": "Password@123"
+}
+
+### 6. Get Current Authenticated Profile
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{studentToken}}
+
+### ------------------------------------------------------------------------------
+### 3. PLACEMENT OFFICER (ADMIN) APPROVALS & VERIFICATION
+### ------------------------------------------------------------------------------
+
+### View All Companies Pending Approval
+GET {{baseUrl}}/admin/recruiters/pending
+Authorization: Bearer {{adminToken}}
+
+### Approve a Company Recruiter (Use recruiter's user id)
+@pendingRecruiterId = 00000000-0000-0000-0000-000000000000
+PUT {{baseUrl}}/admin/recruiters/{{pendingRecruiterId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### Verify Student Academic Profile (Use student user_id or profile id)
+@studentIdToVerify = 00000000-0000-0000-0000-000000000000
+PUT {{baseUrl}}/admin/students/{{studentIdToVerify}}/verify
+Authorization: Bearer {{adminToken}}
+
+### View All Placed Students (Placements report)
+GET {{baseUrl}}/admin/placements
+Authorization: Bearer {{adminToken}}
+
+### View Comprehensive Placement Statistics
+GET {{baseUrl}}/admin/stats
+Authorization: Bearer {{adminToken}}
+
+### View All Registered Users
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{adminToken}}
+
+### ------------------------------------------------------------------------------
+### 4. STUDENT ACADEMIC PROFILE (Role: student)
+### ------------------------------------------------------------------------------
+
+### Get Student Profile
+GET {{baseUrl}}/students/profile
+Authorization: Bearer {{studentToken}}
+
+### Complete Student Profile (Required before applying)
+PUT {{baseUrl}}/students/profile
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "roll_number": "2022CS1042",
+  "course": "B.Tech",
+  "department": "Computer Science & Engineering",
+  "current_year": 4,
+  "graduation_year": 2026,
+  "cgpa": 8.75,
+  "backlogs": 0,
+  "phone": "+91-9876543210",
+  "skills": "Java, Python, Node.js, Express, PostgreSQL, Git",
+  "resume_url": "https://example.com/resumes/rahul-sharma.pdf"
+}
+
+### ------------------------------------------------------------------------------
+### 5. CAMPUS JOBS & PLACEMENT DRIVES (Recruiter & Public)
+### ------------------------------------------------------------------------------
+
+### View All Active Campus Drives (Public)
+GET {{baseUrl}}/jobs
+
+### Filter Drives by Keyword, Location, and Job Type (Public)
+GET {{baseUrl}}/jobs?search=Software&location=Bangalore&job_type=Full-time
+
+### Get Company's Own Posted Drives (Role: recruiter)
+GET {{baseUrl}}/jobs/my/list
+Authorization: Bearer {{recruiterToken}}
+
+### Post a New Campus Drive with Eligibility Criteria (Role: approved recruiter)
+# @name createJob
+POST {{baseUrl}}/jobs
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "title": "Graduate Software Engineer (Campus Drive)",
+  "company": "Acme Tech Solutions",
+  "description": "Hiring 2026 graduates with strong problem solving and backend web development skills.",
+  "location": "Bangalore / Hybrid",
+  "salary": "INR 9,50,000 / year",
+  "job_type": "Full-time",
+  "deadline": "2026-12-31",
+  "min_cgpa": 7.50,
+  "max_backlogs": 0,
+  "allowed_departments": "Computer Science & Engineering, Information Technology",
+  "is_active": true
+}
+
+### Get Single Job by ID (Public)
+@sampleJobId = 00000000-0000-0000-0000-000000000000
+GET {{baseUrl}}/jobs/{{sampleJobId}}
+
+### Update Job Posting (Role: recruiter, own jobs only)
+PUT {{baseUrl}}/jobs/{{sampleJobId}}
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "min_cgpa": 7.00,
+  "salary": "INR 10,00,000 / year"
+}
+
+### Delete Job Posting (Role: recruiter own / admin any)
+DELETE {{baseUrl}}/jobs/{{sampleJobId}}
+Authorization: Bearer {{recruiterToken}}
+
+### ------------------------------------------------------------------------------
+### 6. APPLICATIONS & PLACEMENT PROCESS (Student & Recruiter)
+### ------------------------------------------------------------------------------
+
+### Student Applies to Drive (Checks CGPA, Backlogs, Department, One-Offer rule)
+POST {{baseUrl}}/applications/{{sampleJobId}}
+Authorization: Bearer {{studentToken}}
+
+### Student Tracks Own Application Status
+GET {{baseUrl}}/applications/my
+Authorization: Bearer {{studentToken}}
+
+### Company Views Applicants for their Drive (With student roll number and CGPA)
+GET {{baseUrl}}/applications/job/{{sampleJobId}}
+Authorization: Bearer {{recruiterToken}}
+
+### Company Shortlists / Selects Candidate (Role: recruiter)
+@sampleApplicationId = 00000000-0000-0000-0000-000000000000
+PUT {{baseUrl}}/applications/{{sampleApplicationId}}/status
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "status": "selected"
+}

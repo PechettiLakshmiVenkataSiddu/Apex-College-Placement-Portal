@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | College Placement Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Populated dynamically by app.js renderNavbar() -->
+    </div>
+  </nav>
+
+  <!-- Auth Card Container -->
+  <main class="main-container">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Create Account</h2>
+          <p>Register as a student or company recruiter</p>
+        </div>
+
+        <!-- Feedback Alert Box -->
+        <div id="registerMsg" class="msg-box"></div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="name">Full Name / Company Name <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="name" required placeholder="e.g. Rahul Sharma or Acme Tech Solutions">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Official / College Email Address <span style="color: var(--danger);">*</span></label>
+            <input type="email" id="email" required placeholder="name@college.edu or hr@company.com">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password <span style="color: var(--danger);">*</span></label>
+            <input type="password" id="password" required minlength="6" placeholder="Minimum 6 characters">
+            <div class="form-helper">Must be at least 6 characters long</div>
+          </div>
+
+          <div class="form-group">
+            <label for="role">Registering As <span style="color: var(--danger);">*</span></label>
+            <select id="role" required>
+              <option value="student">Student (Looking for placement)</option>
+              <option value="recruiter">Company / Recruiter (Hiring students)</option>
+            </select>
+            <div id="companyNote" class="form-helper" style="display: none; color: var(--warning); font-weight: 500;">
+              ℹ️ Company accounts require Placement Officer approval before logging in.
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Create Account
+          </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+          Already have an account? <a href="login.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Log in here</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNavbar('register');
+
+      const roleSelect = document.getElementById('role');
+      const companyNote = document.getElementById('companyNote');
+
+      roleSelect.addEventListener('change', () => {
+        if (roleSelect.value === 'recruiter') {
+          companyNote.style.display = 'block';
+        } else {
+          companyNote.style.display = 'none';
+        }
+      });
+
+      document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideMessage('registerMsg');
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const role = roleSelect.value;
+        const submitBtn = document.getElementById('submitBtn');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+
+        const res = await apiCall('/auth/register', 'POST', {
+          name,
+          email,
+          password,
+          role
+        });
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Account';
+
+        if (!res.ok) {
+          showMessage('registerMsg', res.message || 'Registration failed.', 'error');
+          return;
+        }
+
+        if (role === 'recruiter') {
+          showMessage(
+            'registerMsg',
+            'Company registration submitted successfully! Your account is pending approval by the Placement Officer. You may log in once approved.',
+            'info'
+          );
+        } else {
+          showMessage(
+            'registerMsg',
+            'Student account registered successfully! Redirecting to login...',
+            'success'
+          );
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

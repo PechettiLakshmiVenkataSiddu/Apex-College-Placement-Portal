@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex College Placement Portal | Campus Recruitment Drives</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Populated dynamically by app.js renderNavbar() -->
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1>Apex Institute of Technology</h1>
+      <p>Training & Placement Cell — Bridging academic excellence with global industry leaders. Explore active campus placement drives, verify student eligibility, and secure career opportunities.</p>
+      <div class="hero-buttons" id="heroAuthButtons">
+        <a href="login.html" class="btn btn-primary" style="background-color: #ffffff; color: var(--primary);">Login to Portal</a>
+        <a href="register.html" class="btn btn-secondary" style="background-color: rgba(255,255,255,0.15); color: #ffffff; border-color: rgba(255,255,255,0.3);">Register Account</a>
+      </div>
+    </section>
+
+    <!-- Placement Highlights -->
+    <section class="hero-highlights">
+      <div class="highlight-card">
+        <div class="highlight-icon">🏢</div>
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 700;">Verified Companies</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">All visiting recruiters are verified and vetted by the college placement officer.</p>
+        </div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">🎯</div>
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 700;">Transparent Cutoffs</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Clear eligibility criteria based on minimum CGPA, active backlogs, and branch.</p>
+        </div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">📜</div>
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 700;">One-Student-One-Offer</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Ensures equal placement opportunities for all graduating batch students.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Campus Drives Section -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Active Campus Recruitment Drives</h2>
+        <p class="page-subtitle">Browse open opportunities and company eligibility criteria</p>
+      </div>
+      <div>
+        <input type="text" id="searchInput" placeholder="Search by job title or company..." style="max-width: 300px;">
+      </div>
+    </div>
+
+    <!-- Alert / Message Container -->
+    <div id="homeMsg" class="msg-box"></div>
+
+    <!-- Job Cards Grid -->
+    <div id="jobsContainer" class="jobs-grid">
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+        Loading campus drives...
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      renderNavbar('home');
+
+      const user = getUser();
+      if (user) {
+        const heroAuth = document.getElementById('heroAuthButtons');
+        let dest = 'student.html';
+        if (user.role === 'recruiter') dest = 'company.html';
+        if (user.role === 'admin') dest = 'admin.html';
+        heroAuth.innerHTML = `
+          <a href="${dest}" class="btn btn-primary" style="background-color: #ffffff; color: var(--primary);">Go to My Dashboard (${user.role})</a>
+        `;
+      }
+
+      await loadJobs();
+
+      // Search filter listener
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        filterJobs(query);
+      });
+    });
+
+    let allJobs = [];
+
+    const loadJobs = async () => {
+      const res = await apiCall('/jobs');
+      const container = document.getElementById('jobsContainer');
+
+      if (!res.ok || !res.data || res.data.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: #fff; border-radius: 10px; border: 1px solid var(--border-color);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
+            <h3 style="font-weight: 700; color: var(--dark);">No Active Campus Drives Currently</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.35rem;">Approved companies will post campus recruitment drives here soon.</p>
+          </div>
+        `;
+        return;
+      }
+
+      allJobs = res.data;
+      renderJobCards(allJobs);
+    };
+
+    const renderJobCards = (jobs) => {
+      const container = document.getElementById('jobsContainer');
+      const user = getUser();
+
+      if (jobs.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
+            No campus drives match your search query.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = jobs.map(job => {
+        const applyBtnAction = user && user.role === 'student'
+          ? `student.html#drives`
+          : (user ? `${user.role === 'recruiter' ? 'company.html' : 'admin.html'}` : 'login.html');
+
+        const btnLabel = user && user.role === 'student'
+          ? 'Apply in Student Portal →'
+          : (user ? 'View Dashboard →' : 'Login to Apply →');
+
+        return `
+          <div class="job-card">
+            <div class="job-card-header">
+              <span class="job-company">${escapeHtml(job.company)}</span>
+              <h3 class="job-title">${escapeHtml(job.title)}</h3>
+              <div class="job-meta">
+                <span class="job-meta-item">📍 ${escapeHtml(job.location)}</span>
+                <span class="job-meta-item">💼 ${escapeHtml(job.job_type)}</span>
+                <span class="job-meta-item">💰 ${escapeHtml(job.salary || 'Best in Industry')}</span>
+              </div>
+            </div>
+
+            <div class="job-criteria-box">
+              <div class="job-criteria-item">
+                <span style="color: var(--text-muted);">Minimum CGPA:</span>
+                <strong style="color: var(--dark);">${job.min_cgpa ? Number(job.min_cgpa).toFixed(2) : 'No Cutoff'}</strong>
+              </div>
+              <div class="job-criteria-item">
+                <span style="color: var(--text-muted);">Max Backlogs:</span>
+                <strong style="color: var(--dark);">${job.max_backlogs !== null ? job.max_backlogs : 'No Limit'}</strong>
+              </div>
+              <div class="job-criteria-item">
+                <span style="color: var(--text-muted);">Branches:</span>
+                <strong style="color: var(--dark); text-align: right; max-width: 60%;">${escapeHtml(job.allowed_departments || 'All Branches')}</strong>
+              </div>
+              <div class="job-criteria-item">
+                <span style="color: var(--text-muted);">Deadline:</span>
+                <strong style="color: var(--danger);">${formatDate(job.deadline)}</strong>
+              </div>
+            </div>
+
+            <p class="job-desc">${escapeHtml(job.description)}</p>
+
+            <a href="${applyBtnAction}" class="btn btn-primary" style="width: 100%; margin-top: auto;">${btnLabel}</a>
+          </div>
+        `;
+      }).join('');
+    };
+
+    const filterJobs = (query) => {
+      const filtered = allJobs.filter(job => 
+        (job.title && job.title.toLowerCase().includes(query)) ||
+        (job.company && job.company.toLowerCase().includes(query)) ||
+        (job.location && job.location.toLowerCase().includes(query))
+      );
+      renderJobCards(filtered);
+    };
+
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+  </script>
+</body>
+</html>

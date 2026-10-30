@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | College Placement Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Populated dynamically by app.js renderNavbar() -->
+    </div>
+  </nav>
+
+  <!-- Login Card Container -->
+  <main class="main-container">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Portal Login</h2>
+          <p>Access your student, company, or placement officer account</p>
+        </div>
+
+        <!-- Feedback Alert Box -->
+        <div id="loginMsg" class="msg-box"></div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required placeholder="name@college.edu">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required placeholder="Enter your password">
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Sign In
+          </button>
+        </form>
+
+        <!-- Quick Demo Credentials Box for Viva / Evaluators -->
+        <div style="margin-top: 1.5rem; padding: 1rem; background-color: var(--light-bg); border-radius: var(--radius-sm); border: 1px dashed var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
+          <strong style="color: var(--dark); display: block; margin-bottom: 0.25rem;">🔑 Default Placement Officer (Admin):</strong>
+          Email: <code style="color: var(--primary);">admin@portal.com</code><br>
+          Password: <code style="color: var(--primary);">Admin@123</code>
+        </div>
+
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+          Don't have an account? <a href="register.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Register here</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNavbar('login');
+
+      // If user is already logged in, redirect to their role dashboard
+      const existingUser = getUser();
+      const token = getToken();
+      if (existingUser && token) {
+        if (existingUser.role === 'student') window.location.href = 'student.html';
+        else if (existingUser.role === 'recruiter') window.location.href = 'company.html';
+        else if (existingUser.role === 'admin') window.location.href = 'admin.html';
+      }
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideMessage('loginMsg');
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submitBtn');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Signing in...';
+
+        const res = await apiCall('/auth/login', 'POST', { email, password });
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+
+        if (!res.ok) {
+          if (res.status === 403) {
+            // Unapproved company message
+            showMessage(
+              'loginMsg',
+              '⏳ Account Pending Approval: Your company recruiter account has not been approved by the Placement Officer yet. Please contact the college placement cell.',
+              'error'
+            );
+          } else {
+            showMessage('loginMsg', res.message || 'Invalid email or password.', 'error');
+          }
+          return;
+        }
+
+        // Store JWT token and user info in localStorage
+        const { token, user } = res.data;
+        setAuth(token, user);
+
+        showMessage('loginMsg', `Login successful! Welcome ${user.name}. Redirecting...`, 'success');
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (user.role === 'student') {
+            window.location.href = 'student.html';
+          } else if (user.role === 'recruiter') {
+            window.location.href = 'company.html';
+          } else if (user.role === 'admin') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 800);
+      });
+    });
+  </script>
+</body>
+</html>

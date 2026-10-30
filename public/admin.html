@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placement Cell Administration | College Placement Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Populated dynamically by app.js renderNavbar() -->
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Placement Cell Management Dashboard</h1>
+        <p class="page-subtitle">College Placement Officer Console: Company Approvals, Student Verification, and Placement Metrics</p>
+      </div>
+      <div>
+        <span class="badge" style="background-color: #ede9fe; color: #6d28d9; padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+          🛡️ Placement Officer (Admin)
+        </span>
+      </div>
+    </div>
+
+    <!-- Alert / Feedback Banner -->
+    <div id="adminGlobalMsg" class="msg-box"></div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="tabStats">📊 Placement Metrics</button>
+      <button class="tab-btn" data-tab="tabPendingCompanies">
+        🏢 Pending Companies <span id="pendingBadge" class="badge badge-pending" style="display: none; margin-left: 0.35rem;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tabStudents">🎓 Student Verification</button>
+      <button class="tab-btn" data-tab="tabPlacements">🏆 Placements Report</button>
+    </div>
+
+    <!-- TAB 1: PLACEMENT METRICS (STATS) -->
+    <div id="tabStats" class="tab-pane active">
+      <div class="page-header" style="margin-bottom: 1.5rem;">
+        <div>
+          <h2 class="card-title" style="margin-bottom: 0;">Campus Placement Statistics</h2>
+          <p class="page-subtitle">Live aggregated figures across graduating batches</p>
+        </div>
+        <button onclick="loadAdminStats()" class="btn btn-secondary btn-sm">🔄 Refresh Metrics</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Placement Percentage</span>
+            <div class="stat-icon" style="background-color: #ecfdf5; color: #10b981;">📈</div>
+          </div>
+          <div class="stat-value" id="statPlacementRate" style="color: #059669;">0.00%</div>
+          <div class="stat-footer">Placed students out of total students</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Placed Students</span>
+            <div class="stat-icon" style="background-color: #ecfdf5; color: #10b981;">🎉</div>
+          </div>
+          <div class="stat-value" id="statPlacedStudents">0</div>
+          <div class="stat-footer">Students with official job offers</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Registered Students</span>
+            <div class="stat-icon">🎓</div>
+          </div>
+          <div class="stat-value" id="statTotalStudents">0</div>
+          <div class="stat-footer"><span id="statVerifiedStudents">0</span> verified by placement cell</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Visiting Companies</span>
+            <div class="stat-icon">🏢</div>
+          </div>
+          <div class="stat-value" id="statTotalCompanies">0</div>
+          <div class="stat-footer"><span id="statApprovedCompanies">0</span> approved for drives</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Campus Drives</span>
+            <div class="stat-icon">💼</div>
+          </div>
+          <div class="stat-value" id="statTotalJobs">0</div>
+          <div class="stat-footer">Total job postings published</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Total Applications</span>
+            <div class="stat-icon">📄</div>
+          </div>
+          <div class="stat-value" id="statTotalApps">0</div>
+          <div class="stat-footer">Submitted by eligible candidates</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PENDING COMPANIES APPROVAL -->
+    <div id="tabPendingCompanies" class="tab-pane">
+      <div class="card">
+        <h2 class="card-title">Visiting Companies Awaiting Placement Cell Approval</h2>
+        <div id="companyApprovalMsg" class="msg-box"></div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Company Name</th>
+                <th>HR / Contact Email</th>
+                <th>Registration Date</th>
+                <th>Approval Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingCompaniesBody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  Loading pending companies...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: STUDENT VERIFICATION -->
+    <div id="tabStudents" class="tab-pane">
+      <div class="card">
+        <h2 class="card-title">Student Academic Credentials & Placement Verification</h2>
+        <div id="studentVerifyMsg" class="msg-box"></div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Roll Number</th>
+                <th>Course & Department</th>
+                <th>CGPA</th>
+                <th>Backlogs</th>
+                <th>Verification Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentsBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  Loading registered students...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: CAMPUS PLACEMENTS REPORT -->
+    <div id="tabPlacements" class="tab-pane">
+      <div class="card">
+        <h2 class="card-title">Official Campus Placements & Offers Report</h2>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Roll Number</th>
+                <th>Department</th>
+                <th>Placed Company</th>
+                <th>Role / Designation</th>
+                <th>Package (CTC)</th>
+                <th>Offer Date</th>
+              </tr>
+            </thead>
+            <tbody id="placementsBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  Loading placements report...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Guard route for admin role
+      if (!checkAuth(['admin'])) return;
+      renderNavbar('dashboard');
+
+      initTabs((targetTab) => {
+        if (targetTab === 'tabStats') loadAdminStats();
+        if (targetTab === 'tabPendingCompanies') loadPendingCompanies();
+        if (targetTab === 'tabStudents') loadStudents();
+        if (targetTab === 'tabPlacements') loadPlacements();
+      });
+
+      await loadAdminStats();
+      await loadPendingCompanies();
+    });
+
+    // 1. Load placement stats
+    const loadAdminStats = async () => {
+      const res = await apiCall('/admin/stats');
+      if (!res.ok || !res.data) return;
+
+      const d = res.data;
+      document.getElementById('statPlacementRate').textContent = d.placementPercentage || '0.00%';
+      document.getElementById('statPlacedStudents').textContent = d.placedStudents || 0;
+      document.getElementById('statTotalStudents').textContent = d.totalStudents || 0;
+      document.getElementById('statVerifiedStudents').textContent = d.verifiedStudents || 0;
+      document.getElementById('statTotalCompanies').textContent = d.totalCompanies || 0;
+      document.getElementById('statApprovedCompanies').textContent = d.approvedCompanies || 0;
+      document.getElementById('statTotalJobs').textContent = d.totalJobs || 0;
+      document.getElementById('statTotalApps').textContent = d.totalApplications || 0;
+    };
+
+    // 2. Load pending company recruiters
+    const loadPendingCompanies = async () => {
+      const tbody = document.getElementById('pendingCompaniesBody');
+      const badge = document.getElementById('pendingBadge');
+      const res = await apiCall('/admin/recruiters/pending');
+
+      if (!res.ok || !res.data || res.data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              ✓ All registered companies have been approved. No pending accounts.
+            </td>
+          </tr>
+        `;
+        badge.style.display = 'none';
+        return;
+      }
+
+      const pending = res.data;
+      badge.textContent = pending.length;
+      badge.style.display = 'inline-block';
+
+      tbody.innerHTML = pending.map(comp => `
+        <tr>
+          <td><strong>${escapeHtml(comp.name)}</strong></td>
+          <td>${escapeHtml(comp.email)}</td>
+          <td>${formatDate(comp.created_at)}</td>
+          <td><span class="badge badge-pending">Pending Approval</span></td>
+          <td>
+            <button onclick="approveCompany('${comp.id}', '${escapeHtml(comp.name)}')" class="btn btn-success btn-sm">
+              ✓ Approve Company
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    };
+
+    // Approve company recruiter
+    const approveCompany = async (companyId, companyName) => {
+      hideMessage('companyApprovalMsg');
+      const res = await apiCall(`/admin/recruiters/${companyId}/approve`, 'PUT');
+
+      if (!res.ok) {
+        showMessage('companyApprovalMsg', res.message || 'Failed to approve company.', 'error');
+        return;
+      }
+
+      showMessage('companyApprovalMsg', `Company '${companyName}' approved successfully! They can now log in and post campus drives.`, 'success');
+      await loadPendingCompanies();
+      await loadAdminStats();
+    };
+
+    // 3. Load students for verification
+    const loadStudents = async () => {
+      const tbody = document.getElementById('studentsBody');
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading students...</td></tr>`;
+
+      const res = await apiCall('/admin/users?role=student');
+
+      if (!res.ok || !res.data || res.data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              No students have registered yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = res.data.map(student => {
+        const p = student.student_profile || {};
+        const isVerified = p.is_verified || false;
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(student.name)}</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(student.email)}</div>
+            </td>
+            <td><code>${escapeHtml(p.roll_number || 'Incomplete')}</code></td>
+            <td>
+              <div>${escapeHtml(p.course || '')}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHtml(p.department || 'No Branch Set')}</div>
+            </td>
+            <td>
+              <strong style="color: var(--primary);">${p.cgpa !== null && p.cgpa !== undefined ? Number(p.cgpa).toFixed(2) : 'N/A'}</strong>
+            </td>
+            <td>
+              <span class="badge ${p.backlogs > 0 ? 'badge-rejected' : 'badge-verified'}">
+                ${p.backlogs || 0} Backlog(s)
+              </span>
+            </td>
+            <td>
+              ${
+                isVerified
+                  ? `<span class="badge badge-verified">✓ Verified</span>`
+                  : `<span class="badge badge-pending">Unverified</span>`
+              }
+            </td>
+            <td>
+              ${
+                isVerified
+                  ? `<button class="btn btn-secondary btn-sm" disabled>Verified</button>`
+                  : `<button onclick="verifyStudent('${student.id}', '${escapeHtml(student.name)}')" class="btn btn-primary btn-sm">Verify Credentials</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    // Verify student profile
+    const verifyStudent = async (studentId, studentName) => {
+      hideMessage('studentVerifyMsg');
+      const res = await apiCall(`/admin/students/${studentId}/verify`, 'PUT');
+
+      if (!res.ok) {
+        showMessage('studentVerifyMsg', res.message || 'Failed to verify student.', 'error');
+        return;
+      }
+
+      showMessage('studentVerifyMsg', `Academic credentials for student '${studentName}' have been verified!`, 'success');
+      await loadStudents();
+      await loadAdminStats();
+    };
+
+    // 4. Load placements report
+    const loadPlacements = async () => {
+      const tbody = document.getElementById('placementsBody');
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading placements...</td></tr>`;
+
+      const res = await apiCall('/admin/placements');
+
+      if (!res.ok || !res.data || res.data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              No students have been selected for placements yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = res.data.map(p => {
+        const student = p.student || {};
+        const profile = p.profile || {};
+        const job = p.job || {};
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(student.name || 'Student')}</strong></td>
+            <td><code>${escapeHtml(profile.roll_number || 'N/A')}</code></td>
+            <td>${escapeHtml(profile.department || 'N/A')}</td>
+            <td><strong style="color: var(--primary);">${escapeHtml(job.company || 'Company')}</strong></td>
+            <td>${escapeHtml(job.title || 'Role')}</td>
+            <td><span class="badge badge-verified">${escapeHtml(job.salary || 'Best in Industry')}</span></td>
+            <td>${formatDate(p.applied_at)}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+  </script>
+</body>
+</html>

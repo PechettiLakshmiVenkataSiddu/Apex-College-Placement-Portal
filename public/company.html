@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Portal | College Placement Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Populated dynamically by app.js renderNavbar() -->
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Company Recruiter Dashboard</h1>
+        <p class="page-subtitle">Post campus recruitment drives, review applicants, and select candidates</p>
+      </div>
+      <div>
+        <span class="badge badge-verified">✓ Approved Company</span>
+      </div>
+    </div>
+
+    <!-- Alert / Feedback Banner -->
+    <div id="companyGlobalMsg" class="msg-box"></div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="tabPostDrive">📢 Post Campus Drive</button>
+      <button class="tab-btn" data-tab="tabMyDrives">📋 My Drives</button>
+      <button class="tab-btn" data-tab="tabApplicants">👥 Review Applicants</button>
+    </div>
+
+    <!-- TAB 1: POST DRIVE -->
+    <div id="tabPostDrive" class="tab-pane active">
+      <div class="card">
+        <h2 class="card-title">Schedule New Campus Recruitment Drive</h2>
+        <div id="postDriveMsg" class="msg-box"></div>
+
+        <form id="postDriveForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="driveTitle">Job Title / Role <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="driveTitle" required placeholder="e.g. Graduate Software Engineer">
+            </div>
+            <div class="form-group">
+              <label for="companyName">Company Name <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="companyName" required placeholder="e.g. Acme Tech Solutions">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="location">Job Location <span style="color: var(--danger);">*</span></label>
+              <input type="text" id="location" required placeholder="e.g. Bangalore / Hybrid / Remote">
+            </div>
+            <div class="form-group">
+              <label for="salary">Annual CTC / Stipend</label>
+              <input type="text" id="salary" placeholder="e.g. INR 9,50,000 / year">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="jobType">Employment Type <span style="color: var(--danger);">*</span></label>
+              <select id="jobType" required>
+                <option value="Full-time">Full-time</option>
+                <option value="Internship">Internship</option>
+                <option value="Internship + PPO">Internship + PPO</option>
+                <option value="Contract">Contract</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="deadline">Application Deadline Date <span style="color: var(--danger);">*</span></label>
+              <input type="date" id="deadline" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="minCgpa">Minimum CGPA Cutoff</label>
+              <input type="number" step="0.01" min="0" max="10" id="minCgpa" value="0.00" placeholder="0.00">
+              <div class="form-helper">Students below this CGPA cannot apply</div>
+            </div>
+            <div class="form-group">
+              <label for="maxBacklogs">Max Active Backlogs Allowed</label>
+              <input type="number" min="0" id="maxBacklogs" value="0" placeholder="0">
+              <div class="form-helper">Maximum uncleared subjects (0 = no backlogs)</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="allowedDepartments">Eligible Branches / Departments</label>
+            <input type="text" id="allowedDepartments" placeholder="e.g. Computer Science, Information Technology, Electronics (leave empty for all branches)">
+            <div class="form-helper">Comma-separated branch names. Leave empty to allow all branches.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Job Description & Requirements <span style="color: var(--danger);">*</span></label>
+            <textarea id="description" rows="4" required placeholder="Provide details about role responsibilities, tech stack, and interview process..."></textarea>
+          </div>
+
+          <button type="submit" id="postDriveBtn" class="btn btn-primary">
+            Publish Campus Drive
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 2: MY DRIVES -->
+    <div id="tabMyDrives" class="tab-pane">
+      <div class="page-header" style="margin-bottom: 1.5rem;">
+        <div>
+          <h2 class="card-title" style="margin-bottom: 0;">My Company's Campus Drives</h2>
+          <p class="page-subtitle">Manage posted drives and track applicants</p>
+        </div>
+      </div>
+
+      <div id="myDrivesList">
+        <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Loading drives...</p>
+      </div>
+    </div>
+
+    <!-- TAB 3: REVIEW APPLICANTS -->
+    <div id="tabApplicants" class="tab-pane">
+      <div class="card">
+        <h2 class="card-title">Applicant Evaluation & Selection</h2>
+        <div id="applicantStatusMsg" class="msg-box"></div>
+
+        <div class="form-group" style="max-width: 450px;">
+          <label for="driveSelect">Select Campus Drive:</label>
+          <select id="driveSelect">
+            <option value="">-- Choose a drive to view applicants --</option>
+          </select>
+        </div>
+
+        <div class="table-responsive" style="margin-top: 1.5rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Roll Number</th>
+                <th>Branch & CGPA</th>
+                <th>Backlogs</th>
+                <th>Status</th>
+                <th>Resume</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody id="applicantsBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  Please select a drive from the dropdown above.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Guard route for recruiter role
+      if (!checkAuth(['recruiter'])) return;
+      renderNavbar('dashboard');
+
+      const user = getUser();
+      if (user && user.name) {
+        document.getElementById('companyName').value = user.name;
+      }
+
+      // Default deadline to 30 days from now
+      const today = new Date();
+      today.setDate(today.getDate() + 30);
+      document.getElementById('deadline').value = today.toISOString().split('T')[0];
+
+      initTabs((targetTab) => {
+        if (targetTab === 'tabMyDrives') loadMyDrives();
+        if (targetTab === 'tabApplicants') loadDriveOptions();
+      });
+
+      await loadMyDrives();
+      await loadDriveOptions();
+
+      // Drive select change
+      document.getElementById('driveSelect').addEventListener('change', (e) => {
+        const jobId = e.target.value;
+        if (jobId) {
+          loadApplicantsForJob(jobId);
+        } else {
+          document.getElementById('applicantsBody').innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                Please select a drive from the dropdown above.
+              </td>
+            </tr>
+          `;
+        }
+      });
+    });
+
+    let myDrives = [];
+
+    // Form submit for posting a new drive
+    document.getElementById('postDriveForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessage('postDriveMsg');
+
+      const btn = document.getElementById('postDriveBtn');
+      btn.disabled = true;
+      btn.textContent = 'Publishing drive...';
+
+      const payload = {
+        title: document.getElementById('driveTitle').value.trim(),
+        company: document.getElementById('companyName').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        location: document.getElementById('location').value.trim(),
+        salary: document.getElementById('salary').value.trim(),
+        job_type: document.getElementById('jobType').value,
+        deadline: document.getElementById('deadline').value,
+        min_cgpa: document.getElementById('minCgpa').value,
+        max_backlogs: document.getElementById('maxBacklogs').value,
+        allowed_departments: document.getElementById('allowedDepartments').value.trim()
+      };
+
+      const res = await apiCall('/jobs', 'POST', payload);
+      btn.disabled = false;
+      btn.textContent = 'Publish Campus Drive';
+
+      if (!res.ok) {
+        showMessage('postDriveMsg', res.message || 'Failed to post drive.', 'error');
+        return;
+      }
+
+      showMessage('postDriveMsg', 'Campus drive published successfully! Students can now view and apply.', 'success');
+      document.getElementById('driveTitle').value = '';
+      document.getElementById('description').value = '';
+      document.getElementById('salary').value = '';
+      document.getElementById('allowedDepartments').value = '';
+
+      await loadMyDrives();
+      await loadDriveOptions();
+    });
+
+    // Load drives posted by this company
+    const loadMyDrives = async () => {
+      const container = document.getElementById('myDrivesList');
+      const res = await apiCall('/jobs/my/list');
+
+      if (!res.ok || !res.data || res.data.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 3rem; background: #fff; border-radius: 10px; border: 1px solid var(--border-color);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📝</div>
+            <h3 style="font-weight: 700;">No Campus Drives Posted Yet</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Use the "Post Campus Drive" tab to schedule your first recruitment drive.</p>
+          </div>
+        `;
+        return;
+      }
+
+      myDrives = res.data;
+
+      container.innerHTML = `
+        <div class="jobs-grid">
+          ${myDrives.map(drive => `
+            <div class="job-card">
+              <div class="job-card-header">
+                <span class="job-company">${escapeHtml(drive.company)}</span>
+                <h3 class="job-title">${escapeHtml(drive.title)}</h3>
+                <div class="job-meta">
+                  <span class="job-meta-item">📍 ${escapeHtml(drive.location)}</span>
+                  <span class="job-meta-item">💼 ${escapeHtml(drive.job_type)}</span>
+                  <span class="job-meta-item">💰 ${escapeHtml(drive.salary || 'Competitive')}</span>
+                </div>
+              </div>
+
+              <div class="job-criteria-box">
+                <div class="job-criteria-item">
+                  <span style="color: var(--text-muted);">Min CGPA Cutoff:</span>
+                  <strong>${drive.min_cgpa ? Number(drive.min_cgpa).toFixed(2) : '0.00'}</strong>
+                </div>
+                <div class="job-criteria-item">
+                  <span style="color: var(--text-muted);">Max Backlogs:</span>
+                  <strong>${drive.max_backlogs !== null ? drive.max_backlogs : '0'}</strong>
+                </div>
+                <div class="job-criteria-item">
+                  <span style="color: var(--text-muted);">Branches:</span>
+                  <strong style="max-width: 60%; text-align: right;">${escapeHtml(drive.allowed_departments || 'All Branches')}</strong>
+                </div>
+                <div class="job-criteria-item">
+                  <span style="color: var(--text-muted);">Deadline:</span>
+                  <strong style="color: var(--danger);">${formatDate(drive.deadline)}</strong>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                <button onclick="viewApplicantsTab('${drive.id}')" class="btn btn-secondary btn-sm" style="flex: 1;">
+                  View Applicants
+                </button>
+                <button onclick="deleteDrive('${drive.id}')" class="btn btn-danger btn-sm">
+                  Delete
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    };
+
+    // Load drives into the dropdown
+    const loadDriveOptions = async () => {
+      const select = document.getElementById('driveSelect');
+      if (myDrives.length === 0) {
+        const res = await apiCall('/jobs/my/list');
+        if (res.ok && res.data) myDrives = res.data;
+      }
+
+      select.innerHTML = '<option value="">-- Choose a drive to view applicants --</option>' +
+        myDrives.map(d => `<option value="${d.id}">${escapeHtml(d.title)} (${formatDate(d.deadline)})</option>`).join('');
+    };
+
+    // Shortcut from drive card
+    const viewApplicantsTab = (jobId) => {
+      const applicantsTabBtn = document.querySelector('[data-tab="tabApplicants"]');
+      if (applicantsTabBtn) applicantsTabBtn.click();
+      const select = document.getElementById('driveSelect');
+      select.value = jobId;
+      loadApplicantsForJob(jobId);
+    };
+
+    // Load applicants for a drive
+    const loadApplicantsForJob = async (jobId) => {
+      const tbody = document.getElementById('applicantsBody');
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading candidates...</td></tr>`;
+
+      const res = await apiCall(`/applications/job/${jobId}`);
+
+      if (!res.ok || !res.data || !res.data.applicants || res.data.applicants.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              No students have applied to this drive yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = res.data.applicants.map(app => {
+        const student = app.student || {};
+        const profile = app.profile || {};
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(student.name || 'Student')}</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(student.email || '')}</div>
+            </td>
+            <td><code>${escapeHtml(profile.roll_number || 'N/A')}</code></td>
+            <td>
+              <div>${escapeHtml(profile.department || 'N/A')}</div>
+              <strong style="color: var(--primary);">CGPA: ${profile.cgpa !== null && profile.cgpa !== undefined ? Number(profile.cgpa).toFixed(2) : 'N/A'}</strong>
+            </td>
+            <td>
+              <span class="badge ${profile.backlogs > 0 ? 'badge-rejected' : 'badge-verified'}">
+                ${profile.backlogs || 0} Backlog(s)
+              </span>
+            </td>
+            <td>${getStatusBadge(app.status)}</td>
+            <td>
+              ${
+                profile.resume_url
+                  ? `<a href="${profile.resume_url}" target="_blank" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem;">📄 Resume</a>`
+                  : `<span style="color: var(--text-muted); font-size: 0.8rem;">None</span>`
+              }
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                <button onclick="updateStatus('${app.id}', 'shortlisted', '${jobId}')" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;">Shortlist</button>
+                <button onclick="updateStatus('${app.id}', 'selected', '${jobId}')" class="btn btn-success btn-sm" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;">Select (Hire)</button>
+                <button onclick="updateStatus('${app.id}', 'rejected', '${jobId}')" class="btn btn-danger btn-sm" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;">Reject</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    // Update status of applicant
+    const updateStatus = async (applicationId, status, jobId) => {
+      hideMessage('applicantStatusMsg');
+      const res = await apiCall(`/applications/${applicationId}/status`, 'PUT', { status });
+
+      if (!res.ok) {
+        showMessage('applicantStatusMsg', res.message || 'Failed to update status.', 'error');
+        return;
+      }
+
+      showMessage('applicantStatusMsg', `Candidate status successfully updated to '${status}'!`, 'success');
+      await loadApplicantsForJob(jobId);
+    };
+
+    // Delete a drive
+    const deleteDrive = async (jobId) => {
+      if (!confirm('Are you sure you want to cancel and delete this campus drive?')) return;
+
+      const res = await apiCall(`/jobs/${jobId}`, 'DELETE');
+      if (!res.ok) {
+        alert(res.message || 'Failed to delete job.');
+        return;
+      }
+
+      await loadMyDrives();
+      await loadDriveOptions();
+    };
+
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+  </script>
+</body>
+</html>
