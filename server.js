@@ -49,6 +49,24 @@ app.use(express.json());
 // Parse URL-encoded bodies (form data)
 app.use(express.urlencoded({ extended: true }));
 
+// Normalize request URL for Vercel serverless rewrites and edge proxies
+app.use((req, res, next) => {
+  // If Vercel edge rewrite prepended '/public', strip it
+  if (req.url.startsWith('/public')) {
+    req.url = req.url.replace(/^\/public/, '') || '/';
+  }
+  // If Vercel passed the matched route in proxy headers, restore original route
+  const matchedPath = req.headers['x-matched-path'] || req.headers['x-vercel-matched-path'];
+  if (matchedPath && (req.url === '/' || req.url === '/api' || req.url.includes('index.js'))) {
+    req.url = matchedPath;
+  }
+  // If req.url is an internal Vercel script path like /api/index.js, map to base
+  if (req.url.startsWith('/api/index.js')) {
+    req.url = req.url.replace(/^\/api\/index\.js/, '') || '/';
+  }
+  next();
+});
+
 // Serve static frontend files from 'public' directory (opens at http://localhost:5000)
 app.use(express.static(path.join(__dirname, 'public')));
 
