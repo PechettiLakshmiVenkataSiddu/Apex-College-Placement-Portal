@@ -20,6 +20,13 @@ const router = express.Router();
 router.get('/', jobController.getAllJobs);
 
 /**
+ * @route   GET /api/jobs/public/stats
+ * @desc    Get public placement summary statistics (companies, open drives, placed students)
+ * @access  Public
+ */
+router.get('/public/stats', jobController.getPublicStats);
+
+/**
  * @route   GET /api/jobs/my/list
  * @desc    Get all jobs posted by the logged-in company
  * @access  Protected (recruiter)
@@ -29,6 +36,18 @@ router.get(
   verifyToken,
   allowRoles('recruiter'),
   jobController.getMyJobs
+);
+
+/**
+ * @route   GET /api/jobs/:id/eligibility
+ * @desc    Check current student's eligibility for a job posting
+ * @access  Protected (student)
+ */
+router.get(
+  '/:id/eligibility',
+  verifyToken,
+  allowRoles('student'),
+  jobController.checkJobEligibility
 );
 
 /**
@@ -54,10 +73,23 @@ router.post(
     body('location').trim().notEmpty().withMessage('Job location is required.'),
     body('job_type').trim().notEmpty().withMessage('Job type is required (e.g., Full-time, Internship).'),
     body('deadline')
-      .notEmpty()
-      .withMessage('Application deadline date is required.')
-      .isISO8601()
-      .withMessage('Deadline must be a valid date in YYYY-MM-DD format.'),
+      .custom((value, { req }) => {
+        const d = value || req.body.last_date_to_apply;
+        if (!d) throw new Error('Application deadline date is required.');
+        if (isNaN(Date.parse(d))) throw new Error('Deadline must be a valid date in YYYY-MM-DD format.');
+        return true;
+      }),
+    body('package_lpa')
+      .optional({ checkFalsy: true })
+      .isFloat({ min: 0.0 })
+      .withMessage('Package (LPA) must be a positive number.'),
+    body('positions')
+      .optional({ checkFalsy: true })
+      .isInt({ min: 1 })
+      .withMessage('Positions must be an integer of at least 1.'),
+    body('selection_process')
+      .optional()
+      .trim(),
     body('min_cgpa')
       .optional()
       .isFloat({ min: 0.0, max: 10.0 })
@@ -82,9 +114,24 @@ router.put(
   allowRoles('recruiter'),
   [
     body('deadline')
-      .optional()
+      .optional({ checkFalsy: true })
       .isISO8601()
       .withMessage('Deadline must be a valid date in YYYY-MM-DD format.'),
+    body('last_date_to_apply')
+      .optional({ checkFalsy: true })
+      .isISO8601()
+      .withMessage('Last date to apply must be a valid date in YYYY-MM-DD format.'),
+    body('package_lpa')
+      .optional({ checkFalsy: true })
+      .isFloat({ min: 0.0 })
+      .withMessage('Package (LPA) must be a positive number.'),
+    body('positions')
+      .optional({ checkFalsy: true })
+      .isInt({ min: 1 })
+      .withMessage('Positions must be an integer of at least 1.'),
+    body('selection_process')
+      .optional()
+      .trim(),
     body('min_cgpa')
       .optional()
       .isFloat({ min: 0.0, max: 10.0 })

@@ -3,26 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Portal | College Placement Portal</title>
+  <title>Student Portal | Apex Placement Portal</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Navigation Bar (dynamically populated by renderNavbar in app.js) -->
   <nav class="navbar">
-    <div class="nav-container">
-      <!-- Populated dynamically by app.js renderNavbar() -->
-    </div>
+    <div class="nav-container"></div>
   </nav>
 
   <!-- Main Container -->
   <main class="main-container">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Student Placement Dashboard</h1>
-        <p class="page-subtitle">Manage your academic credentials, browse eligible drives, and track job offers</p>
+        <h1 class="page-title" id="studentWelcomeTitle">Student Placement Portal</h1>
+        <p class="page-subtitle">Manage your profile, verify drive eligibility, upload resumes, and track placement offers</p>
       </div>
       <div id="verifiedStatusBadge"></div>
+    </div>
+
+    <!-- Celebration Banner for Selected (Placed) Student -->
+    <div id="selectedCelebrationBanner" class="msg-box msg-success" style="display: none; padding: 1.25rem 1.5rem; font-size: 1rem; border-left: 5px solid var(--success);">
+      🎉 <strong>CONGRATULATIONS!</strong> You have been officially selected by <span id="placedCompanyName" style="font-weight: 800; text-decoration: underline;">Top Company</span>!
+      <div style="font-size: 0.88rem; margin-top: 0.35rem; color: #065f46;">
+        Under the college <strong>One-Student-One-Offer</strong> placement policy, your campus placement is secured!
+      </div>
     </div>
 
     <!-- Alert / Feedback Banner -->
@@ -30,54 +36,137 @@
 
     <!-- Tabs Navigation -->
     <div class="tabs-nav">
-      <button class="tab-btn active" data-tab="tabProfile">📋 Academic Profile</button>
+      <button class="tab-btn active" data-tab="tabDashboard">📊 Dashboard</button>
+      <button class="tab-btn" data-tab="tabProfile">📋 My Profile</button>
       <button class="tab-btn" data-tab="tabDrives">💼 Campus Drives</button>
       <button class="tab-btn" data-tab="tabApplications">📄 My Applications</button>
     </div>
 
-    <!-- TAB 1: ACADEMIC PROFILE -->
-    <div id="tabProfile" class="tab-pane active">
-      <div class="card">
+    <!-- ===================================================================== -->
+    <!-- TAB 1: DASHBOARD -->
+    <!-- ===================================================================== -->
+    <div id="tabDashboard" class="tab-pane active">
+      <!-- Profile Completion Card -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <h2 class="card-title" style="margin-bottom: 0;">Profile Completion Status</h2>
+          <span id="profileCompletionPercent" style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">0%</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+          Complete your academic credentials and upload your resume to be eligible for upcoming campus drives.
+        </p>
+        <div class="progress-container">
+          <div id="profileProgressBar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Dashboard Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Total Applications</span>
+            <div class="stat-icon" style="background-color: var(--primary-light); color: var(--primary);">📄</div>
+          </div>
+          <div class="stat-value" id="dashTotalApps">0</div>
+          <div class="stat-footer">Total drives applied to</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Shortlisted</span>
+            <div class="stat-icon" style="background-color: #fef3c7; color: #b45309;">⭐</div>
+          </div>
+          <div class="stat-value" id="dashShortlistedApps" style="color: #b45309;">0</div>
+          <div class="stat-footer">Drives progressing in rounds</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Offers / Selected</span>
+            <div class="stat-icon" style="background-color: #ecfdf5; color: #059669;">🏆</div>
+          </div>
+          <div class="stat-value" id="dashSelectedApps" style="color: #059669;">0</div>
+          <div class="stat-footer">Secured campus job offers</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Eligible Open Drives</span>
+            <div class="stat-icon" style="background-color: #eff6ff; color: #2563eb;">🎯</div>
+          </div>
+          <div class="stat-value" id="dashEligibleDrives" style="color: #2563eb;">0</div>
+          <div class="stat-footer">Matching your CGPA &amp; branch</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: MY PROFILE & RESUME UPLOAD -->
+    <!-- ===================================================================== -->
+    <div id="tabProfile" class="tab-pane">
+      <div class="card" style="margin-bottom: 1.5rem;">
         <h2 class="card-title">
-          <span>College Academic & Placement Credentials</span>
-          <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Required for drive eligibility</span>
+          <span>College Placement Academic Profile</span>
+          <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Used for drive eligibility matching</span>
         </h2>
 
         <div id="profileMsg" class="msg-box"></div>
 
-        <form id="profileForm">
+        <form id="profileForm" novalidate>
           <div class="form-row">
             <div class="form-group">
-              <label for="roll_number">College Roll / Registration Number <span style="color: var(--danger);">*</span></label>
+              <label for="roll_number">College Roll / Reg Number <span style="color: var(--danger);">*</span></label>
               <input type="text" id="roll_number" required placeholder="e.g. 2022CS1042">
+              <div class="field-error" id="roll_numberError"></div>
             </div>
             <div class="form-group">
               <label for="course">Course / Degree <span style="color: var(--danger);">*</span></label>
               <input type="text" id="course" required placeholder="e.g. B.Tech, MCA, B.Sc">
+              <div class="field-error" id="courseError"></div>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="department">Department / Branch <span style="color: var(--danger);">*</span></label>
-              <input type="text" id="department" required placeholder="e.g. Computer Science & Engineering">
-              <div class="form-helper">Matches against company allowed departments</div>
+              <select id="department" required>
+                <option value="">-- Select Your Branch --</option>
+                <option value="Computer Science & Engineering">Computer Science &amp; Engineering (CSE)</option>
+                <option value="Information Technology">Information Technology (IT)</option>
+                <option value="Electronics & Communication">Electronics &amp; Communication (ECE)</option>
+                <option value="Electrical & Electronics">Electrical &amp; Electronics (EEE)</option>
+                <option value="Mechanical Engineering">Mechanical Engineering (ME)</option>
+                <option value="Civil Engineering">Civil Engineering (CE)</option>
+                <option value="Master of Computer Applications">Master of Computer Applications (MCA)</option>
+                <option value="Artificial Intelligence & Data Science">Artificial Intelligence &amp; Data Science (AI &amp; DS)</option>
+                <option value="Other">Other Branch</option>
+              </select>
+              <div class="form-helper">Matches against company eligible branches</div>
+              <div class="field-error" id="departmentError"></div>
             </div>
             <div class="form-group">
               <label for="current_year">Current Year of Study <span style="color: var(--danger);">*</span></label>
-              <input type="number" id="current_year" min="1" max="6" required placeholder="e.g. 4">
+              <select id="current_year" required>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4" selected>4th Year (Final Year)</option>
+                <option value="5">5th Year (Dual Degree)</option>
+              </select>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="graduation_year">Year of Graduation <span style="color: var(--danger);">*</span></label>
-              <input type="number" id="graduation_year" min="2020" max="2035" required placeholder="e.g. 2026">
+              <input type="number" id="graduation_year" min="2020" max="2035" required value="2026" placeholder="2026">
+              <div class="field-error" id="graduation_yearError"></div>
             </div>
             <div class="form-group">
-              <label for="cgpa">Cumulative Grade Point Average (CGPA) <span style="color: var(--danger);">*</span></label>
-              <input type="number" step="0.01" min="0" max="10" id="cgpa" required placeholder="e.g. 8.75">
+              <label for="cgpa">Cumulative CGPA (0.00 - 10.00) <span style="color: var(--danger);">*</span></label>
+              <input type="number" step="0.01" min="0" max="10" id="cgpa" required placeholder="e.g. 8.50">
               <div class="form-helper">Scale of 0.00 to 10.00</div>
+              <div class="field-error" id="cgpaError"></div>
             </div>
           </div>
 
@@ -85,7 +174,8 @@
             <div class="form-group">
               <label for="backlogs">Active Backlogs Count <span style="color: var(--danger);">*</span></label>
               <input type="number" min="0" id="backlogs" required value="0" placeholder="0">
-              <div class="form-helper">Number of currently uncleared subjects (0 if none)</div>
+              <div class="form-helper">Number of uncleared subjects (0 if all cleared)</div>
+              <div class="field-error" id="backlogsError"></div>
             </div>
             <div class="form-group">
               <label for="phone">Contact Phone Number</label>
@@ -94,305 +184,782 @@
           </div>
 
           <div class="form-group">
-            <label for="skills">Technical Skills & Certifications</label>
-            <input type="text" id="skills" placeholder="e.g. Java, Python, Node.js, Express, PostgreSQL, Git, React">
+            <label for="skills">Technical Skills</label>
+            <input type="text" id="skills" placeholder="e.g. Java, Python, C++, React, Node.js, SQL, AWS, Git">
           </div>
 
-          <div class="form-group">
-            <label for="resume_url">Resume / Portfolio Link</label>
-            <input type="url" id="resume_url" placeholder="https://example.com/my-resume.pdf or Google Drive link">
-          </div>
-
-          <button type="submit" id="saveProfileBtn" class="btn btn-primary">
+          <button type="submit" id="saveProfileBtn" class="btn btn-primary" style="margin-top: 0.5rem;">
             Save Academic Profile
           </button>
         </form>
       </div>
+
+      <!-- Resume Upload Card -->
+      <div class="card">
+        <h2 class="card-title">
+          <span>Official Resume PDF</span>
+          <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">PDF format only, maximum 2 MB</span>
+        </h2>
+
+        <div id="resumeMsg" class="msg-box"></div>
+
+        <form id="resumeUploadForm" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <input type="file" id="resumeFileInput" accept=".pdf,application/pdf" style="padding: 0.5rem; max-width: 320px;">
+            <button type="submit" id="uploadResumeBtn" class="btn btn-secondary">
+              📤 Upload Resume PDF
+            </button>
+          </div>
+          <div id="resumeStatusText" style="font-size: 0.85rem; color: var(--text-muted);">
+            Please select your latest resume PDF (max 2 MB).
+          </div>
+        </form>
+
+        <div id="currentResumeView" style="margin-top: 1.25rem; padding: 1rem; background-color: var(--light-bg); border-radius: var(--radius-sm); border: 1px dashed var(--border-color); display: none;">
+          <span style="font-weight: 600; color: var(--dark);">📄 Current Resume on File: </span>
+          <a id="currentResumeLink" href="#" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 700; margin-left: 0.5rem;">
+            View Uploaded Resume PDF ↗
+          </a>
+        </div>
+      </div>
     </div>
 
-    <!-- TAB 2: CAMPUS DRIVES -->
+    <!-- ===================================================================== -->
+    <!-- TAB 3: CAMPUS DRIVES -->
+    <!-- ===================================================================== -->
     <div id="tabDrives" class="tab-pane">
-      <div class="page-header" style="margin-bottom: 1.5rem;">
+      <div class="page-header" style="flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
         <div>
           <h2 class="card-title" style="margin-bottom: 0;">Available Campus Placement Drives</h2>
-          <p class="page-subtitle">Automatic real-time eligibility check on CGPA, Backlogs, and Branch</p>
+          <p class="page-subtitle">Real-time eligibility checking against your CGPA, Backlogs, and Department</p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="text" id="driveSearchInput" placeholder="Search title or company..." style="width: 200px; padding: 0.5rem 0.75rem;">
+          <select id="driveLocationFilter" style="width: 140px; padding: 0.5rem 0.75rem;">
+            <option value="">All Locations</option>
+          </select>
+          <select id="driveJobTypeFilter" style="width: 140px; padding: 0.5rem 0.75rem;">
+            <option value="">All Types</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Internship">Internship</option>
+          </select>
+          <select id="drivePackageFilter" style="width: 140px; padding: 0.5rem 0.75rem;">
+            <option value="">Any Package</option>
+            <option value="5">5+ LPA</option>
+            <option value="10">10+ LPA</option>
+            <option value="15">15+ LPA</option>
+          </select>
         </div>
       </div>
 
+      <!-- Drives Grid -->
       <div id="drivesContainer" class="jobs-grid">
-        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
-          Loading drives...
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Checking placement drives and verifying your eligibility...</p>
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: MY APPLICATIONS -->
+    <!-- ===================================================================== -->
+    <!-- TAB 4: MY APPLICATIONS -->
+    <!-- ===================================================================== -->
     <div id="tabApplications" class="tab-pane">
-      <div id="placedCelebrationBox" class="msg-box msg-success" style="display: none; margin-bottom: 1.5rem; font-size: 1rem;">
-        🎉 <strong>Congratulations!</strong> You have been officially selected for a campus placement offer! Under the college <strong>One-Student-One-Offer</strong> policy, your placement status is secured.
-      </div>
-
       <div class="card">
-        <h2 class="card-title">My Submitted Applications</h2>
+        <h2 class="card-title">My Placement Applications &amp; Progress</h2>
         
-        <div class="table-responsive">
-          <table id="applicationsTable">
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>Role / Title</th>
-                <th>Applied Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="applicationsBody">
-              <tr>
-                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                  Loading applications...
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="applicationsContainer">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Loading your submitted applications...</p>
+          </div>
         </div>
       </div>
     </div>
 
   </main>
 
+  <!-- ======================================================================= -->
+  <!-- MODAL: DRIVE DETAILS & SELECTION PROCESS -->
+  <!-- ======================================================================= -->
+  <div id="jobDetailsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span id="modalJobCompany" class="job-company">Company</span>
+          <h3 id="modalJobTitle" class="modal-title">Job Title</h3>
+        </div>
+        <button type="button" class="toast-close" onclick="closeJobDetailsModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="job-meta" style="margin-bottom: 1rem;">
+          <span id="modalJobLocation" class="job-meta-item">📍 Location</span>
+          <span id="modalJobType" class="job-meta-item">💼 Type</span>
+          <span id="modalJobPackage" class="job-meta-item">💰 Package</span>
+          <span id="modalJobPositions" class="job-meta-item">👥 Positions</span>
+        </div>
+
+        <div style="background-color: var(--light-bg); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1.25rem;">
+          <strong style="display: block; margin-bottom: 0.35rem; color: var(--dark);">📋 Selection Process &amp; Rounds:</strong>
+          <p id="modalJobProcess" style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0;">
+            Aptitude Online Test &gt; Technical Interview 1 &gt; HR Interview
+          </p>
+        </div>
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--dark);">Job Description:</h4>
+        <p id="modalJobDescription" style="font-size: 0.9rem; color: var(--text-main); line-height: 1.6; white-space: pre-line; margin-bottom: 1.25rem;"></p>
+
+        <div id="modalEligibilityStatus" style="margin-top: 1rem;"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeJobDetailsModal()">Close</button>
+        <button type="button" id="modalApplyBtn" class="btn btn-primary btn-sm">Apply Now</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
-    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal.</p>
+    <p>© 2026 Apex Placement Portal — Training &amp; Placement Cell.</p>
   </footer>
 
   <script src="app.js"></script>
   <script>
+    /**
+     * student.html script
+     * -------------------
+     * Manages student dashboard metrics, profile management, resume PDF upload to Supabase,
+     * real-time drive eligibility evaluation, application submission, and progress tracking.
+     */
+
+    let currentProfile = null;
+    let myApplications = [];
+    let myAppliedJobIds = new Set();
+    let isPlacedStudent = false;
+    let studentDrives = [];
+    let activeModalJobId = null;
+
     document.addEventListener('DOMContentLoaded', async () => {
-      // Guard route for student role
+      // Guard route: Only authenticated students allowed
       if (!checkAuth(['student'])) return;
       renderNavbar('dashboard');
 
+      const user = getUser();
+      if (user && user.name) {
+        document.getElementById('studentWelcomeTitle').textContent = `Welcome back, ${user.name}!`;
+      }
+
+      // Initialize tabs
       initTabs((targetTab) => {
+        if (targetTab === 'tabDashboard') loadDashboardStats();
+        if (targetTab === 'tabProfile') loadProfile();
         if (targetTab === 'tabDrives') loadStudentDrives();
         if (targetTab === 'tabApplications') loadStudentApplications();
       });
 
-      // Handle hash navigation (e.g. student.html#drives)
-      if (window.location.hash === '#drives') {
-        const driveTabBtn = document.querySelector('[data-tab="tabDrives"]');
-        if (driveTabBtn) driveTabBtn.click();
-      }
+      // Handle hash navigation (e.g., student.html#drives)
+      const handleHashNav = () => {
+        if (window.location.hash === '#drives') {
+          const driveTabBtn = document.querySelector('[data-tab="tabDrives"]');
+          if (driveTabBtn) driveTabBtn.click();
+        } else if (window.location.hash === '#profile') {
+          const profileTabBtn = document.querySelector('[data-tab="tabProfile"]');
+          if (profileTabBtn) profileTabBtn.click();
+        } else if (window.location.hash === '#applications') {
+          const appsTabBtn = document.querySelector('[data-tab="tabApplications"]');
+          if (appsTabBtn) appsTabBtn.click();
+        }
+      };
 
+      handleHashNav();
+      window.addEventListener('hashchange', handleHashNav);
+
+      // Initial data fetches
       await loadProfile();
+      await loadDashboardStats();
       await loadStudentApplications();
+
+      // Form listeners
+      setupProfileForm();
+      setupResumeForm();
+      setupDriveFilters();
     });
 
-    let currentProfile = null;
-    let myAppliedJobIds = new Set();
-    let isSelectedStudent = false;
+    /**
+     * Fetch student dashboard summary metrics
+     */
+    const loadDashboardStats = async () => {
+      const res = await apiCall('/students/dashboard');
+      if (!res.ok || !res.data) return;
 
-    // Load student profile
+      const data = res.data;
+      isPlacedStudent = Boolean(data.is_selected);
+
+      // Update progress bar
+      const percent = data.profileCompletion || 0;
+      document.getElementById('profileCompletionPercent').textContent = `${percent}%`;
+      document.getElementById('profileProgressBar').style.width = `${percent}%`;
+
+      // Update stat cards
+      const counts = data.applicationCounts || { total: 0, shortlisted: 0, selected: 0 };
+      document.getElementById('dashTotalApps').textContent = counts.total;
+      document.getElementById('dashShortlistedApps').textContent = counts.shortlisted;
+      document.getElementById('dashSelectedApps').textContent = counts.selected;
+      document.getElementById('dashEligibleDrives').textContent = data.eligibleDrivesCount || 0;
+
+      // Congratulation banner if student is selected
+      const celebrationBanner = document.getElementById('selectedCelebrationBanner');
+      if (data.is_selected && data.selected_company) {
+        celebrationBanner.style.display = 'block';
+        document.getElementById('placedCompanyName').textContent = `${data.selected_company} (${data.selected_role || 'Placed Candidate'})`;
+      } else {
+        celebrationBanner.style.display = 'none';
+      }
+    };
+
+    /**
+     * Load current student profile
+     */
     const loadProfile = async () => {
       const res = await apiCall('/students/profile');
       if (!res.ok || !res.data) return;
 
       currentProfile = res.data;
 
-      // Update badge
+      // Verification badge
       const badgeContainer = document.getElementById('verifiedStatusBadge');
       if (currentProfile.is_verified) {
-        badgeContainer.innerHTML = `<span class="badge badge-verified">✓ Academic Credentials Verified</span>`;
+        badgeContainer.innerHTML = `<span class="badge badge-verified">✓ Verified by Placement Officer</span>`;
       } else {
-        badgeContainer.innerHTML = `<span class="badge badge-pending">⏳ Verification Pending by Placement Cell</span>`;
+        badgeContainer.innerHTML = `<span class="badge badge-pending">⏳ Verification Pending</span>`;
       }
 
-      // Populate form fields
+      // Populate profile form fields
       if (currentProfile.roll_number) document.getElementById('roll_number').value = currentProfile.roll_number;
       if (currentProfile.course) document.getElementById('course').value = currentProfile.course;
       if (currentProfile.department) document.getElementById('department').value = currentProfile.department;
       if (currentProfile.current_year) document.getElementById('current_year').value = currentProfile.current_year;
       if (currentProfile.graduation_year) document.getElementById('graduation_year').value = currentProfile.graduation_year;
-      if (currentProfile.cgpa !== null) document.getElementById('cgpa').value = currentProfile.cgpa;
-      if (currentProfile.backlogs !== null) document.getElementById('backlogs').value = currentProfile.backlogs;
+      if (currentProfile.cgpa !== null && currentProfile.cgpa !== undefined) document.getElementById('cgpa').value = currentProfile.cgpa;
+      if (currentProfile.backlogs !== null && currentProfile.backlogs !== undefined) document.getElementById('backlogs').value = currentProfile.backlogs;
       if (currentProfile.phone) document.getElementById('phone').value = currentProfile.phone;
       if (currentProfile.skills) document.getElementById('skills').value = currentProfile.skills;
-      if (currentProfile.resume_url) document.getElementById('resume_url').value = currentProfile.resume_url;
+
+      // Display resume link if already uploaded
+      const resumeView = document.getElementById('currentResumeView');
+      const resumeLink = document.getElementById('currentResumeLink');
+      if (currentProfile.resume_url) {
+        resumeView.style.display = 'block';
+        resumeLink.href = currentProfile.resume_url;
+      } else {
+        resumeView.style.display = 'none';
+      }
     };
 
-    // Save profile form listener
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideMessage('profileMsg');
+    /**
+     * Profile form submit listener
+     */
+    const setupProfileForm = () => {
+      const form = document.getElementById('profileForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAllFieldErrors(form);
 
-      const saveBtn = document.getElementById('saveProfileBtn');
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving...';
+        const roll_number = document.getElementById('roll_number').value.trim();
+        const course = document.getElementById('course').value.trim();
+        const department = document.getElementById('department').value.trim();
+        const current_year = document.getElementById('current_year').value;
+        const graduation_year = document.getElementById('graduation_year').value;
+        const cgpa = document.getElementById('cgpa').value;
+        const backlogs = document.getElementById('backlogs').value;
+        const phone = document.getElementById('phone').value.trim();
+        const skills = document.getElementById('skills').value.trim();
 
-      const payload = {
-        roll_number: document.getElementById('roll_number').value.trim(),
-        course: document.getElementById('course').value.trim(),
-        department: document.getElementById('department').value.trim(),
-        current_year: document.getElementById('current_year').value,
-        graduation_year: document.getElementById('graduation_year').value,
-        cgpa: document.getElementById('cgpa').value,
-        backlogs: document.getElementById('backlogs').value,
-        phone: document.getElementById('phone').value.trim(),
-        skills: document.getElementById('skills').value.trim(),
-        resume_url: document.getElementById('resume_url').value.trim()
-      };
+        // Validation
+        let hasError = false;
+        if (!roll_number) {
+          setFieldError('roll_number', 'Roll number is required.');
+          hasError = true;
+        }
+        if (!course) {
+          setFieldError('course', 'Course/degree is required.');
+          hasError = true;
+        }
+        if (!department) {
+          setFieldError('department', 'Please select your department.');
+          hasError = true;
+        }
+        if (!cgpa || isNaN(parseFloat(cgpa)) || parseFloat(cgpa) < 0 || parseFloat(cgpa) > 10) {
+          setFieldError('cgpa', 'Valid CGPA between 0.00 and 10.00 is required.');
+          hasError = true;
+        }
+        if (backlogs === '' || parseInt(backlogs, 10) < 0) {
+          setFieldError('backlogs', 'Backlogs must be 0 or positive integer.');
+          hasError = true;
+        }
 
-      const res = await apiCall('/students/profile', 'PUT', payload);
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'Save Academic Profile';
+        if (hasError) return;
 
-      if (!res.ok) {
-        showMessage('profileMsg', res.message || 'Failed to update profile.', 'error');
-        return;
-      }
+        const saveBtn = document.getElementById('saveProfileBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving Profile...';
 
-      currentProfile = res.data;
-      showMessage('profileMsg', 'Profile updated successfully! You can now apply for campus drives.', 'success');
-    });
+        try {
+          const res = await apiCall('/students/profile', 'PUT', {
+            roll_number,
+            course,
+            department,
+            current_year,
+            graduation_year,
+            cgpa,
+            backlogs,
+            phone,
+            skills
+          });
 
-    // Load available drives
+          if (!res.ok) {
+            showToast(res.message || 'Failed to update profile.', 'error');
+            return;
+          }
+
+          currentProfile = res.data;
+          showToast('Academic profile updated successfully!', 'success');
+          await loadDashboardStats();
+        } catch (err) {
+          console.error('Save profile exception:', err);
+          showToast('An error occurred while saving profile.', 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Academic Profile';
+        }
+      });
+    };
+
+    /**
+     * Resume PDF upload listener
+     */
+    const setupResumeForm = () => {
+      const resumeForm = document.getElementById('resumeUploadForm');
+      const fileInput = document.getElementById('resumeFileInput');
+      const uploadBtn = document.getElementById('uploadResumeBtn');
+      const statusText = document.getElementById('resumeStatusText');
+
+      resumeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+
+        if (!file) {
+          showToast('Please select a PDF resume file first.', 'warning');
+          return;
+        }
+
+        // Validate client-side PDF and size
+        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+          showToast('Invalid format: Only PDF files are allowed.', 'error');
+          return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('File size exceeds 2 MB limit. Please compress your PDF.', 'error');
+          return;
+        }
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading to Storage...';
+        statusText.textContent = '⏳ Uploading resume to secure storage bucket...';
+
+        try {
+          const res = await uploadResumeFile(file);
+
+          if (!res.ok) {
+            statusText.textContent = `❌ ${res.message || 'Upload failed.'}`;
+            showToast(res.message || 'Resume upload failed.', 'error');
+            return;
+          }
+
+          showToast('Resume uploaded and saved to profile!', 'success');
+          statusText.textContent = '✓ Resume uploaded successfully!';
+
+          if (res.data && res.data.resume_url) {
+            const resumeView = document.getElementById('currentResumeView');
+            const resumeLink = document.getElementById('currentResumeLink');
+            resumeView.style.display = 'block';
+            resumeLink.href = res.data.resume_url;
+            if (currentProfile) currentProfile.resume_url = res.data.resume_url;
+          }
+
+          await loadDashboardStats();
+        } catch (err) {
+          console.error('Resume upload exception:', err);
+          statusText.textContent = '❌ Upload failed due to a network error.';
+          showToast('Network error while uploading resume.', 'error');
+        } finally {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = '📤 Upload Resume PDF';
+        }
+      });
+    };
+
+    /**
+     * Load campus drives & real-time eligibility
+     */
     const loadStudentDrives = async () => {
       const container = document.getElementById('drivesContainer');
+      showLoading(container, 'Loading campus drives and checking eligibility...');
+
       const res = await apiCall('/jobs');
 
       if (!res.ok || !res.data || res.data.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
-            No active campus drives at this moment.
-          </div>
-        `;
+        container.innerHTML = getEmptyStateHtml('💼', 'No drives yet', 'There are no active campus recruitment drives at the moment.');
         return;
       }
 
-      const drives = res.data;
+      studentDrives = res.data;
+
+      // Populate unique locations
+      const locationSelect = document.getElementById('driveLocationFilter');
+      const existingLocs = new Set();
+      studentDrives.forEach(j => { if (j.location) existingLocs.add(j.location); });
+      locationSelect.innerHTML = '<option value="">All Locations</option>';
+      [...existingLocs].sort().forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        locationSelect.appendChild(opt);
+      });
+
+      // Fetch eligibility for all drives in parallel
+      const eligibilityPromises = studentDrives.map(job =>
+        apiCall(`/jobs/${job.id}/eligibility`).then(r => ({ jobId: job.id, eligibility: r.data }))
+      );
+
+      const eligibilityResults = await Promise.all(eligibilityPromises);
+      const eligibilityMap = {};
+      eligibilityResults.forEach(item => {
+        eligibilityMap[item.jobId] = item.eligibility;
+      });
+
+      renderStudentDriveCards(studentDrives, eligibilityMap);
+    };
+
+    /**
+     * Render drives with eligibility badges and apply restrictions
+     */
+    const renderStudentDriveCards = (drives, eligibilityMap = {}) => {
+      const container = document.getElementById('drivesContainer');
+
+      if (drives.length === 0) {
+        container.innerHTML = getEmptyStateHtml('🔍', 'No matching drives', 'Try adjusting your search criteria or package filter.');
+        return;
+      }
 
       container.innerHTML = drives.map(job => {
-        const hasApplied = myAppliedJobIds.has(job.id);
+        const elig = eligibilityMap[job.id] || { eligible: false, reasons: ['Eligibility check pending'] };
+        const isEligible = elig.eligible;
+        const alreadyApplied = elig.alreadyApplied || myAppliedJobIds.has(job.id);
+        const pkgDisplay = formatPackage(job.package_lpa, job.salary);
+
+        // Eligibility Badge
+        let badgeHtml = isEligible
+          ? `<span class="badge badge-eligible">✓ You are eligible</span>`
+          : `<span class="badge badge-ineligible">✕ Not eligible</span>`;
+
+        // Action button state
+        let btnDisabled = false;
+        let btnText = 'Apply Now';
+        let disableReason = '';
+
+        if (alreadyApplied) {
+          btnDisabled = true;
+          btnText = '✓ Already Applied';
+          disableReason = 'You have already applied for this campus drive.';
+        } else if (isPlacedStudent) {
+          btnDisabled = true;
+          btnText = 'Placed (One-Offer)';
+          disableReason = 'One-Student-One-Offer: You have already secured a placement offer.';
+        } else if (elig.isExpired) {
+          btnDisabled = true;
+          btnText = 'Deadline Passed';
+          disableReason = 'The application deadline has passed.';
+        } else if (!isEligible) {
+          btnDisabled = true;
+          btnText = 'Not Eligible';
+          disableReason = elig.reasons && elig.reasons.length > 0 ? elig.reasons[0] : 'You do not meet the minimum eligibility cutoffs.';
+        }
 
         return `
-          <div class="job-card" id="drive-card-${job.id}">
+          <div class="job-card">
             <div class="job-card-header">
-              <span class="job-company">${escapeHtml(job.company)}</span>
-              <h3 class="job-title">${escapeHtml(job.title)}</h3>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+                <span class="job-company">${escapeHtml(job.company)}</span>
+                ${badgeHtml}
+              </div>
+              <h3 class="job-title" style="margin-top: 0.35rem;">${escapeHtml(job.title)}</h3>
               <div class="job-meta">
                 <span class="job-meta-item">📍 ${escapeHtml(job.location)}</span>
                 <span class="job-meta-item">💼 ${escapeHtml(job.job_type)}</span>
-                <span class="job-meta-item">💰 ${escapeHtml(job.salary || 'Competitive')}</span>
+                <span class="job-meta-item">💰 ${escapeHtml(pkgDisplay)}</span>
+                ${job.positions ? `<span class="job-meta-item">👥 ${job.positions} vacancy</span>` : ''}
               </div>
             </div>
 
             <div class="job-criteria-box">
               <div class="job-criteria-item">
                 <span style="color: var(--text-muted);">Min CGPA:</span>
-                <strong style="color: var(--dark);">${job.min_cgpa ? Number(job.min_cgpa).toFixed(2) : 'None'}</strong>
+                <strong style="color: var(--dark);">${job.min_cgpa ? Number(job.min_cgpa).toFixed(2) : 'No Cutoff'}</strong>
               </div>
               <div class="job-criteria-item">
                 <span style="color: var(--text-muted);">Max Backlogs:</span>
-                <strong style="color: var(--dark);">${job.max_backlogs !== null ? job.max_backlogs : 'Any'}</strong>
+                <strong style="color: var(--dark);">${job.max_backlogs !== null ? job.max_backlogs : 'None'}</strong>
               </div>
               <div class="job-criteria-item">
-                <span style="color: var(--text-muted);">Eligible Branches:</span>
+                <span style="color: var(--text-muted);">Branches:</span>
                 <strong style="color: var(--dark); text-align: right; max-width: 60%;">${escapeHtml(job.allowed_departments || 'All Branches')}</strong>
               </div>
               <div class="job-criteria-item">
-                <span style="color: var(--text-muted);">Deadline:</span>
+                <span style="color: var(--text-muted);">Last Date:</span>
                 <strong style="color: var(--danger);">${formatDate(job.deadline)}</strong>
               </div>
             </div>
 
-            <p class="job-desc">${escapeHtml(job.description)}</p>
+            ${!isEligible && elig.reasons && elig.reasons.length > 0 ? `
+              <div style="font-size: 0.8rem; color: var(--danger); background: #fef2f2; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
+                ⚠ ${escapeHtml(elig.reasons[0])}
+              </div>
+            ` : ''}
 
-            <div id="drive-msg-${job.id}" class="msg-box" style="margin-bottom: 0.75rem;"></div>
-
-            ${
-              hasApplied
-                ? `<button class="btn btn-secondary" disabled style="width: 100%; margin-top: auto;">✓ Already Applied</button>`
-                : `<button onclick="applyToDrive('${job.id}')" id="btn-apply-${job.id}" class="btn btn-primary" style="width: 100%; margin-top: auto;">Apply for Drive</button>`
-            }
+            <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+              <button onclick="openJobDetailsModal('${job.id}')" class="btn btn-secondary btn-sm" style="flex: 1;">
+                View Details
+              </button>
+              <button onclick="handleStudentApply('${job.id}')" class="btn btn-primary btn-sm" style="flex: 1;" ${btnDisabled ? 'disabled' : ''}>
+                ${btnText}
+              </button>
+            </div>
+            ${disableReason && !alreadyApplied ? `
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.35rem;">
+                ${escapeHtml(disableReason)}
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
     };
 
-    // Apply to a specific drive
-    const applyToDrive = async (jobId) => {
-      const msgBoxId = `drive-msg-${jobId}`;
-      const btn = document.getElementById(`btn-apply-${jobId}`);
-      hideMessage(msgBoxId);
+    /**
+     * Drive filters listener
+     */
+    const setupDriveFilters = () => {
+      const applyDriveFilter = () => {
+        const query = document.getElementById('driveSearchInput').value.toLowerCase().trim();
+        const selectedLoc = document.getElementById('driveLocationFilter').value.toLowerCase().trim();
+        const selectedType = document.getElementById('driveJobTypeFilter').value.toLowerCase().trim();
+        const minPkg = parseFloat(document.getElementById('drivePackageFilter').value) || 0;
 
-      btn.disabled = true;
-      btn.textContent = 'Verifying eligibility...';
+        const filtered = studentDrives.filter(job => {
+          const matchesQuery = !query ||
+            (job.title && job.title.toLowerCase().includes(query)) ||
+            (job.company && job.company.toLowerCase().includes(query));
+
+          const matchesLoc = !selectedLoc ||
+            (job.location && job.location.toLowerCase().includes(selectedLoc));
+
+          const matchesType = !selectedType ||
+            (job.job_type && job.job_type.toLowerCase() === selectedType);
+
+          const pkg = job.package_lpa ? parseFloat(job.package_lpa) : 0;
+          const matchesPkg = minPkg === 0 || pkg >= minPkg;
+
+          return matchesQuery && matchesLoc && matchesType && matchesPkg;
+        });
+
+        // Re-check cached eligibility for filtered cards
+        loadStudentDrives();
+      };
+
+      document.getElementById('driveSearchInput').addEventListener('input', applyDriveFilter);
+      document.getElementById('driveLocationFilter').addEventListener('change', applyDriveFilter);
+      document.getElementById('driveJobTypeFilter').addEventListener('change', applyDriveFilter);
+      document.getElementById('drivePackageFilter').addEventListener('change', applyDriveFilter);
+    };
+
+    /**
+     * Open drive details modal with full description & selection process
+     */
+    window.openJobDetailsModal = async (jobId) => {
+      const job = studentDrives.find(j => j.id === jobId);
+      if (!job) return;
+
+      activeModalJobId = jobId;
+      document.getElementById('modalJobCompany').textContent = job.company;
+      document.getElementById('modalJobTitle').textContent = job.title;
+      document.getElementById('modalJobLocation').textContent = `📍 ${job.location}`;
+      document.getElementById('modalJobType').textContent = `💼 ${job.job_type}`;
+      document.getElementById('modalJobPackage').textContent = `💰 ${formatPackage(job.package_lpa, job.salary)}`;
+      document.getElementById('modalJobPositions').textContent = `👥 ${job.positions || 1} position(s)`;
+      document.getElementById('modalJobProcess').textContent = job.selection_process || 'Online Assessment > Technical Interview > HR Discussion';
+      document.getElementById('modalJobDescription').textContent = job.description;
+
+      // Check eligibility
+      const eligRes = await apiCall(`/jobs/${jobId}/eligibility`);
+      const elig = eligRes.ok && eligRes.data ? eligRes.data : { eligible: false, reasons: [] };
+
+      const statusBox = document.getElementById('modalEligibilityStatus');
+      const applyBtn = document.getElementById('modalApplyBtn');
+
+      if (elig.alreadyApplied || myAppliedJobIds.has(jobId)) {
+        statusBox.innerHTML = `<span class="badge badge-applied">✓ Already Applied</span>`;
+        applyBtn.disabled = true;
+        applyBtn.textContent = 'Already Applied';
+      } else if (elig.eligible) {
+        statusBox.innerHTML = `<span class="badge badge-eligible">✓ You meet all eligibility criteria</span>`;
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply Now';
+        applyBtn.onclick = () => {
+          closeJobDetailsModal();
+          handleStudentApply(jobId);
+        };
+      } else {
+        const reasonText = elig.reasons && elig.reasons.length > 0 ? elig.reasons.join('<br>• ') : 'Ineligible';
+        statusBox.innerHTML = `
+          <div style="font-size: 0.85rem; color: var(--danger); background: #fef2f2; padding: 0.75rem; border-radius: var(--radius-sm);">
+            <strong>✕ Eligibility Criteria Not Met:</strong><br>• ${reasonText}
+          </div>
+        `;
+        applyBtn.disabled = true;
+        applyBtn.textContent = 'Not Eligible';
+      }
+
+      document.getElementById('jobDetailsModal').style.display = 'flex';
+    };
+
+    window.closeJobDetailsModal = () => {
+      document.getElementById('jobDetailsModal').style.display = 'none';
+      activeModalJobId = null;
+    };
+
+    /**
+     * Submit application to campus drive
+     */
+    window.handleStudentApply = async (jobId) => {
+      // 1. Check profile and resume before applying
+      if (!currentProfile || !currentProfile.roll_number || !currentProfile.department || currentProfile.cgpa === null) {
+        showToast('Profile incomplete: Please complete your academic details in My Profile first.', 'error', 4500);
+        const profileTab = document.querySelector('[data-tab="tabProfile"]');
+        if (profileTab) profileTab.click();
+        return;
+      }
+
+      if (!currentProfile.resume_url) {
+        showToast('Resume missing: Please upload your resume PDF in My Profile before applying.', 'error', 4500);
+        const profileTab = document.querySelector('[data-tab="tabProfile"]');
+        if (profileTab) profileTab.click();
+        return;
+      }
+
+      const job = studentDrives.find(j => j.id === jobId);
+      const companyName = job ? job.company : 'this company';
+
+      const confirmed = await confirmAction({
+        title: 'Confirm Campus Drive Application',
+        message: `Are you sure you want to apply for the position at ${companyName}? Your verified academic profile and resume will be submitted to the recruiters.`,
+        confirmText: 'Submit Application'
+      });
+
+      if (!confirmed) return;
 
       const res = await apiCall(`/applications/${jobId}`, 'POST');
 
-      btn.disabled = false;
-      btn.textContent = 'Apply for Drive';
-
       if (!res.ok) {
-        showMessage(msgBoxId, res.message || 'Application rejected.', 'error');
+        showToast(res.message || 'Application failed.', 'error', 5000);
         return;
       }
 
-      // Successful application
-      showMessage(msgBoxId, 'Application submitted successfully!', 'success');
-      btn.disabled = true;
-      btn.className = 'btn btn-secondary';
-      btn.textContent = '✓ Already Applied';
-
+      showToast(`Application to ${companyName} submitted successfully!`, 'success', 3500);
       myAppliedJobIds.add(jobId);
-      await loadStudentApplications();
+
+      // Refresh applications and dashboard
+      await Promise.all([loadStudentApplications(), loadDashboardStats(), loadStudentDrives()]);
     };
 
-    // Load student's submitted applications
+    /**
+     * Load student's submitted applications & application progress stepper
+     */
     const loadStudentApplications = async () => {
+      const container = document.getElementById('applicationsContainer');
       const res = await apiCall('/applications/my');
-      const tbody = document.getElementById('applicationsBody');
-      const celebrationBox = document.getElementById('placedCelebrationBox');
 
       if (!res.ok || !res.data || res.data.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-              You have not applied to any campus drives yet. Go to the "Campus Drives" tab to apply!
-            </td>
-          </tr>
-        `;
+        container.innerHTML = getEmptyStateHtml('📄', 'No applications submitted', 'Explore the Campus Drives tab and apply to eligible drives.');
         return;
       }
 
-      myAppliedJobIds.clear();
-      isSelectedStudent = false;
+      myApplications = res.data;
+      myAppliedJobIds = new Set(myApplications.map(a => a.job ? a.job.id : null).filter(Boolean));
 
-      tbody.innerHTML = res.data.map(app => {
-        if (app.job) myAppliedJobIds.add(app.job.id);
-        if (app.status === 'selected') isSelectedStudent = true;
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          ${myApplications.map(app => {
+            const status = (app.status || 'applied').toLowerCase();
+            const jobTitle = app.job ? app.job.title : 'Placement Drive';
+            const company = app.job ? app.job.company : 'Corporate Recruiter';
 
-        return `
-          <tr>
-            <td><strong>${escapeHtml(app.job ? app.job.company : 'Company')}</strong></td>
-            <td>${escapeHtml(app.job ? app.job.title : 'Role')}</td>
-            <td>${formatDate(app.applied_at)}</td>
-            <td>${getStatusBadge(app.status)}</td>
-          </tr>
-        `;
-      }).join('');
+            // Stepper stages: Applied -> Shortlisted -> Selected
+            const isApplied = true;
+            const isShortlisted = status === 'shortlisted' || status === 'selected';
+            const isSelected = status === 'selected';
+            const isRejected = status === 'rejected';
 
-      if (isSelectedStudent) {
-        celebrationBox.style.display = 'block';
-      }
-    };
+            return `
+              <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; background: #ffffff;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+                  <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--dark); margin-bottom: 0.2rem;">${escapeHtml(jobTitle)}</h3>
+                    <div style="font-size: 0.95rem; font-weight: 600; color: var(--primary);">${escapeHtml(company)}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                      Applied on ${formatDate(app.applied_at)}
+                    </div>
+                  </div>
+                  <div>
+                    ${getStatusBadge(app.status)}
+                  </div>
+                </div>
 
-    const escapeHtml = (str) => {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+                <!-- Progress Tracker: Applied -> Shortlisted -> Selected -->
+                <div style="margin-top: 1.5rem;">
+                  <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Application Progress Tracker
+                  </div>
+
+                  <div class="stepper">
+                    <!-- Step 1: Applied -->
+                    <div class="step-item ${isApplied ? 'completed' : ''}">
+                      <div class="step-circle">${isApplied ? '✓' : '1'}</div>
+                      <div class="step-label">Applied</div>
+                    </div>
+
+                    <!-- Step 2: Shortlisted -->
+                    <div class="step-item ${isRejected ? 'rejected' : (isShortlisted ? 'completed' : (status === 'applied' ? 'active' : ''))}">
+                      <div class="step-circle">${isRejected ? '✕' : (isShortlisted ? '✓' : '2')}</div>
+                      <div class="step-label">${isRejected ? 'Rejected' : 'Shortlisted'}</div>
+                    </div>
+
+                    <!-- Step 3: Selected -->
+                    <div class="step-item ${isSelected ? 'completed' : ''}">
+                      <div class="step-circle">${isSelected ? '🏆' : '3'}</div>
+                      <div class="step-label">Selected</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     };
   </script>
 </body>

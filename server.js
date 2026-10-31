@@ -56,7 +56,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 2. HEALTH CHECK ROUTE
 // ============================================================================
 
-app.get('/api/health', (req, res) => {
+const healthHandler = (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'Server is running smoothly',
@@ -65,17 +65,30 @@ app.get('/api/health', (req, res) => {
       uptime: process.uptime()
     }
   });
-});
+};
+
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
 
 // ============================================================================
 // 3. API ROUTE MOUNTING
 // ============================================================================
 
+// Mount routes with /api prefix (standard) and without (for Vercel serverless rewrite flexibility)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/students', studentRoutes);
+app.use('/students', studentRoutes);
+
 app.use('/api/jobs', jobRoutes);
+app.use('/jobs', jobRoutes);
+
 app.use('/api/applications', applicationRoutes);
+app.use('/applications', applicationRoutes);
+
 app.use('/api/admin', adminRoutes);
+app.use('/admin', adminRoutes);
 
 // ============================================================================
 // 4. ERROR HANDLING MIDDLEWARE
@@ -91,14 +104,17 @@ app.use(errorHandler);
 // 5. SERVER INITIALIZATION
 // ============================================================================
 
-const server = app.listen(PORT, async () => {
-  console.log('====================================================');
-  console.log(`🚀 Student Recruitment Portal Backend running on port ${PORT}`);
-  console.log(`📍 Local URL: http://localhost:${PORT}`);
-  console.log('====================================================');
+// Only bind TCP port when server.js is run directly (not when imported by Vercel serverless functions)
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    console.log('====================================================');
+    console.log(`🚀 Student Recruitment Portal Backend running on port ${PORT}`);
+    console.log(`📍 Local URL: http://localhost:${PORT}`);
+    console.log('====================================================');
 
-  // Verify connection to Supabase database
-  await testSupabaseConnection();
-});
+    // Verify connection to Supabase database
+    await testSupabaseConnection();
+  });
+}
 
 module.exports = app;

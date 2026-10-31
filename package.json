@@ -9,6 +9,9 @@
     "seed:admin": "node scripts/createAdmin.js",
     "test": "node testFlow.js"
   },
+  "engines": {
+    "node": ">=18.x"
+  },
   "keywords": [
     "express",
     "nodejs",
@@ -27,7 +30,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

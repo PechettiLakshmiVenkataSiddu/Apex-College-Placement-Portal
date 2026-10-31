@@ -36,11 +36,12 @@ router.put('/recruiters/:id/approve', adminController.approveRecruiter);
 router.put('/students/:id/verify', adminController.verifyStudent);
 
 /**
- * @route   GET /api/admin/placements
+ * @route   GET /api/admin/placements (and /api/admin/reports/placements)
  * @desc    View list of all placed/selected students with company and job details
  * @access  Protected (admin)
  */
 router.get('/placements', adminController.getPlacements);
+router.get('/reports/placements', adminController.getPlacements);
 
 /**
  * @route   GET /api/admin/stats

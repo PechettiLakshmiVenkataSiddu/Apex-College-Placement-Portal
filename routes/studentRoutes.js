@@ -6,6 +6,7 @@
 
 const express = require('express');
 const { body } = require('express-validator');
+const multer = require('multer');
 const studentController = require('../controllers/studentController');
 const { verifyToken, allowRoles } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/errorHandler');
@@ -14,6 +15,64 @@ const router = express.Router();
 
 // Enforce student role authentication across all endpoints in this router
 router.use(verifyToken, allowRoles('student'));
+
+// ============================================================================
+// MULTER STORAGE CONFIGURATION (PDF only, max 2 MB, memory storage)
+// ============================================================================
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 2 * 1024 * 1024 // 2 Megabytes
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF documents are allowed.'));
+    }
+  }
+});
+
+// Middleware wrapper to return clear user-friendly errors for file type or size limits
+const handleResumeUpload = (req, res, next) => {
+  upload.single('resume')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'File size exceeds 2 MB limit. Please upload a smaller PDF.',
+          data: null
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: `Upload error: ${err.message}`,
+        data: null
+      });
+    } else if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+        data: null
+      });
+    }
+    next();
+  });
+};
+
+/**
+ * @route   GET /api/students/dashboard
+ * @desc    Get current student's placement dashboard stats (profile completion, counts by status, eligible drives)
+ * @access  Protected (student)
+ */
+router.get('/dashboard', studentController.getDashboard);
+
+/**
+ * @route   POST /api/students/resume
+ * @desc    Upload student resume PDF to Supabase Storage and save public URL in student_profiles
+ * @access  Protected (student)
+ */
+router.post('/resume', handleResumeUpload, studentController.uploadResume);
 
 /**
  * @route   GET /api/students/profile

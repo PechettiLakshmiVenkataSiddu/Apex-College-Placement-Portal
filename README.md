@@ -1,4 +1,4 @@
-# 🎓 College Placement & Recruitment Portal - Backend API
+# ðŸŽ“ College Placement & Recruitment Portal - Backend API
 
 A complete, beginner-friendly RESTful backend API built with **Node.js**, **Express.js**, and **Supabase (PostgreSQL)** for managing on-campus recruitment drives in a college.
 
@@ -6,7 +6,7 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## 📋 Table of Contents
+## ðŸ“‹ Table of Contents
 1. [Core Roles & Workflow](#-core-roles--workflow)
 2. [Tech Stack](#-tech-stack)
 3. [Project Structure](#-project-structure)
@@ -20,7 +20,7 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## 👥 Core Roles & Workflow
+## ðŸ‘¥ Core Roles & Workflow
 
 1. **Student**:
    - Registers account and completes academic profile (roll number, course, department, current year, CGPA, backlogs, skills, resume).
@@ -45,7 +45,7 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## 🚀 Tech Stack
+## ðŸš€ Tech Stack
 
 | Technology | Purpose | Why We Chose It |
 | :--- | :--- | :--- |
@@ -62,44 +62,61 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## 📁 Project Structure
+## ðŸ“ Project Structure
 
 ```text
 student_recruitment_website/
-├── config/
-│   └── supabase.js             # Connects to Supabase with Service Role Key & tests connection
-├── controllers/
-│   ├── authController.js       # Register, login (with approval checks), and me profile
-│   ├── studentController.js    # Academic placement profile fetch and UPSERT
-│   ├── jobController.js        # Campus drive listing, recruiter CRUD with eligibility criteria
-│   ├── applicationController.js# Eligibility checks, One-Offer policy, apply & status updates
-│   └── adminController.js      # Company approvals, student verification, placements & stats
-├── routes/
-│   ├── authRoutes.js           # /api/auth routes with input validation
-│   ├── studentRoutes.js        # /api/students routes (protected: student)
-│   ├── jobRoutes.js            # /api/jobs routes (public and approved recruiter)
-│   ├── applicationRoutes.js    # /api/applications routes
-│   └── adminRoutes.js          # /api/admin routes (protected: admin)
-├── middleware/
-│   ├── authMiddleware.js       # verifyToken (JWT decoder) & allowRoles (RBAC)
-│   └── errorHandler.js         # Input validation checker, 404 handler, and global error catcher
-├── database/
-│   ├── update.sql              # ALTER statements to update existing databases without data loss
-│   └── schema.sql              # Full PostgreSQL schema for fresh setup
-├── scripts/
-│   └── createAdmin.js          # Utility script to create/seed Placement Officer account
-├── .env.example                # Example template of required environment variables
-├── .gitignore                  # Prevents node_modules and .env from being committed
-├── package.json                # Project dependencies and npm scripts
-├── postman_collection.json     # Ready-to-import Postman collection
-├── requests.http               # Ready-to-run HTTP requests for VS Code REST Client
-├── server.js                   # Application entry point, middleware pipeline, and server listener
-└── README.md                   # Complete documentation and viva revision guide
+â”œâ”€â”€ config/
+â”‚   â””â”€â”€ supabase.js             # Connects to Supabase with Service Role Key & tests connection
+â”œâ”€â”€ controllers/
+â”‚   â”œâ”€â”€ authController.js       # Register, login (with approval checks), and me profile
+â”‚   â”œâ”€â”€ studentController.js    # Academic placement profile fetch and UPSERT
+â”‚   â”œâ”€â”€ jobController.js        # Campus drive listing, recruiter CRUD with eligibility criteria
+â”‚   â”œâ”€â”€ applicationController.js# Eligibility checks, One-Offer policy, apply & status updates
+â”‚   â””â”€â”€ adminController.js      # Company approvals, student verification, placements & stats
+â”œâ”€â”€ routes/
+â”‚   â”œâ”€â”€ authRoutes.js           # /api/auth routes with input validation
+â”‚   â”œâ”€â”€ studentRoutes.js        # /api/students routes (protected: student)
+â”‚   â”œâ”€â”€ jobRoutes.js            # /api/jobs routes (public and approved recruiter)
+â”‚   â”œâ”€â”€ applicationRoutes.js    # /api/applications routes
+â”‚   â””â”€â”€ adminRoutes.js          # /api/admin routes (protected: admin)
+â”œâ”€â”€ middleware/
+â”‚   â”œâ”€â”€ authMiddleware.js       # verifyToken (JWT decoder) & allowRoles (RBAC)
+â”‚   â””â”€â”€ errorHandler.js         # Input validation checker, 404 handler, and global error catcher
+â”œâ”€â”€ database/
+â”‚   â”œâ”€â”€ update.sql              # ALTER statements to update existing databases without data loss
+â”‚   â””â”€â”€ schema.sql              # Full PostgreSQL schema for fresh setup
+â”œâ”€â”€ scripts/
+â”‚   â””â”€â”€ createAdmin.js          # Utility script to create/seed Placement Officer account
+â”œâ”€â”€ .env.example                # Example template of required environment variables
+â”œâ”€â”€ .gitignore                  # Prevents node_modules and .env from being committed
+â”œâ”€â”€ package.json                # Project dependencies and npm scripts
+â”œâ”€â”€ postman_collection.json     # Ready-to-import Postman collection
+â”œâ”€â”€ requests.http               # Ready-to-run HTTP requests for VS Code REST Client
+â”œâ”€â”€ server.js                   # Application entry point, middleware pipeline, and server listener
+â””â”€â”€ README.md                   # Complete documentation and viva revision guide
 ```
 
 ---
 
-## 🗄️ Database Schema & Update Script
+## ðŸ—„ï¸ Database Schema & Update Script
+
+### Required Supabase Setup (Storage Bucket & Database Updates):
+
+#### 1. Create Public Storage Bucket ("resumes")
+1. Open your project on [Supabase Dashboard](https://supabase.com/dashboard).
+2. Click **Storage** in the left sidebar menu.
+3. Click **New bucket** (or **Create bucket**).
+4. Enter the Bucket Name: `resumes`
+5. **Toggle "Public bucket" to ON** (checked).
+   > âš ï¸ **Important**: This must be public so recruiters and placement officers can view and download students' resume PDFs.
+6. Click **Save bucket**.
+
+#### 2. Run Database Migration Scripts in Supabase SQL Editor:
+- **If you are starting fresh**: Run [`database/schema.sql`](./database/schema.sql) in the Supabase SQL Editor.
+- **If you have existing tables**: Run [`database/update.sql`](./database/update.sql) followed by [`database/update2.sql`](./database/update2.sql) in your **Supabase SQL Editor**:
+  - Adds `package_lpa` (numeric), `positions` (integer), and `selection_process` (text) to `jobs`.
+  - Sets up indexes for package filtering.
 
 ### If you already have existing tables:
 Open and run [`database/update.sql`](file:///c:/Users/peche/student_recruitment_website/database/update.sql) in your **Supabase SQL Editor**:
@@ -172,7 +189,7 @@ erDiagram
 
 ---
 
-## ⚖️ Placement Business Logic & Policies
+## âš–ï¸ Placement Business Logic & Policies
 
 1. **Company Recruiter Approval**:
    - Company recruiters self-register with `is_approved = false`.
@@ -198,7 +215,7 @@ erDiagram
 
 ---
 
-## ⚙️ Step-by-Step Setup Guide
+## âš™ï¸ Step-by-Step Setup Guide
 
 ### 1. Install Dependencies
 ```bash
@@ -240,7 +257,7 @@ npm start
 
 ---
 
-## 📡 API Endpoints Reference
+## ðŸ“¡ API Endpoints Reference
 
 All endpoints return uniform JSON:
 ```json
@@ -295,7 +312,7 @@ All endpoints return uniform JSON:
 
 ---
 
-## 📝 Sample Request & Response Payloads
+## ðŸ“ Sample Request & Response Payloads
 
 ### 1. Register a Company
 `POST /api/auth/register`
@@ -397,7 +414,7 @@ All endpoints return uniform JSON:
 
 ---
 
-## 💻 Frontend Web Application (HTML, CSS & Vanilla JS)
+## ðŸ’» Frontend Web Application (HTML, CSS & Vanilla JS)
 
 The portal features a lightweight, responsive, and beginner-friendly frontend located in the `public/` directory and served statically by Express (`app.use(express.static('public'))`).  
 Opening **`http://localhost:5000`** in any web browser loads the portal immediately.
@@ -418,7 +435,7 @@ Opening **`http://localhost:5000`** in any web browser loads the portal immediat
 
 ---
 
-## 🧪 Full Testing & Browser Demo Walkthrough
+## ðŸ§ª Full Testing & Browser Demo Walkthrough
 
 ### 1. Automated Test Suite (Console)
 Run the automated 24-point end-to-end verification suite in terminal:
@@ -434,11 +451,11 @@ npm test
    - Click **Create Account**. Note the message: *Company registration submitted. Account is pending approval by the Placement Officer.*
 3. **Verify Blocked Login (Approval Gate)**:
    - Go to **Login** (`login.html`) and enter `"hr@globex.com"` / `"Password@123"`.
-   - The portal displays a clear warning: `⏳ Account Pending Approval: Your company recruiter account has not been approved by the Placement Officer yet.`
+   - The portal displays a clear warning: `â³ Account Pending Approval: Your company recruiter account has not been approved by the Placement Officer yet.`
 4. **Placement Officer Approves Company**:
    - In `login.html`, log in as Placement Officer: `"admin@portal.com"` / `"Admin@123"`.
    - Redirects to `admin.html`. Open the **Pending Companies** tab.
-   - Click **✓ Approve Company** next to Globex Corp.
+   - Click **âœ“ Approve Company** next to Globex Corp.
    - Click **Logout** in top navbar.
 5. **Company Posts Campus Drive**:
    - Log in as `"hr@globex.com"` / `"Password@123"`. Redirects to `company.html`.
@@ -458,7 +475,7 @@ npm test
    - Click **Campus Drives** tab.
    - Locate the `"Associate Software Engineer"` drive from Globex Corp.
    - Click **Apply for Drive**. The system verifies CGPA (8.60 >= 7.50), backlogs (0 <= 0), and department match.
-   - Application succeeds and button changes to **✓ Already Applied**.
+   - Application succeeds and button changes to **âœ“ Already Applied**.
    - Check **My Applications** tab to view application with status `"Applied"`.
    - Click **Logout**.
 8. **Company Evaluates & Selects Candidate**:
@@ -478,7 +495,7 @@ npm test
 
 ---
 
-## 🎓 Viva Voce Revision Guide
+## ðŸŽ“ Viva Voce Revision Guide
 
 ### 1. How is company recruiter verification enforced in this system?
 > **Answer:** Company accounts are created with `is_approved = false` in the PostgreSQL `users` table. During `POST /api/auth/login`, before generating a JWT, the server checks `if (user.role === 'recruiter' && !user.is_approved)`. If unapproved, it returns `403 Forbidden`. Only the Placement Officer can approve them via `PUT /api/admin/recruiters/:id/approve`.
@@ -500,5 +517,39 @@ npm test
 ### 5. How is placement percentage computed in `/api/admin/stats`?
 > **Answer:** The Placement Officer controller executes aggregate `count: 'exact'` queries across `users` (where role is student) and `applications` (where status is selected). The formula is:
 > $$\text{Placement Percentage} = \left(\frac{\text{Placed Students}}{\text{Total Registered Students}}\right) \times 100$$
-#   A p e x - C o l l e g e - P l a c e m e n t - P o r t a l  
- 
+
+---
+
+## ☁️ Vercel Deployment Guide
+
+This project is pre-configured for 1-click deployment on **Vercel** with a serverless Express backend and static frontend.
+
+### Prerequisites Configured in Project:
+- `vercel.json`: Handles URL rewrites routing `/api/*` to the serverless function and static assets (`/`) to `public/`.
+- `api/index.js`: Serverless entry point exporting the Express application.
+- `.vercelignore`: Prevents local files, test scripts, and secrets from uploading.
+
+### Method 1: Deploy via Vercel CLI (Recommended)
+```bash
+# 1. Login to Vercel (if not already logged in)
+vercel login
+
+# 2. Deploy to production
+vercel --prod
+```
+
+### Method 2: Deploy via Vercel Web Dashboard (GitHub / GitLab)
+1. Push your repository to GitHub.
+2. Go to [https://vercel.com/new](https://vercel.com/new) and select your repository.
+3. Keep default settings:
+   - **Framework Preset**: Other
+   - **Root Directory**: `./`
+4. Add **Environment Variables** in the Vercel project settings:
+   - `JWT_SECRET`: `your_secure_jwt_secret_key_here`
+   - `USE_LOCAL_DB`: `true` (to run immediately with the built-in database & demo drives)
+   - *(Optional)* If using cloud Supabase:
+     - `SUPABASE_URL`: `https://your-project.supabase.co`
+     - `SUPABASE_SERVICE_ROLE_KEY`: `your_service_role_key`
+     - `USE_LOCAL_DB`: `false`
+5. Click **Deploy**!
+

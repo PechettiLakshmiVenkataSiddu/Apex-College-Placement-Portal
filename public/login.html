@@ -3,16 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | College Placement Portal</title>
+  <title>Login | Apex Placement Portal</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <!-- Navigation Bar -->
   <nav class="navbar">
-    <div class="nav-container">
-      <!-- Populated dynamically by app.js renderNavbar() -->
-    </div>
+    <div class="nav-container"></div>
   </nav>
 
   <!-- Login Card Container -->
@@ -21,33 +19,40 @@
       <div class="auth-card">
         <div class="auth-header">
           <h2>Portal Login</h2>
-          <p>Access your student, company, or placement officer account</p>
+          <p>Access your student, recruiter, or placement officer account</p>
         </div>
 
-        <!-- Feedback Alert Box -->
+        <!-- 403 Pending Approval or General Alert Box -->
         <div id="loginMsg" class="msg-box"></div>
 
-        <form id="loginForm">
+        <form id="loginForm" novalidate>
           <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" required placeholder="name@college.edu">
+            <label for="email">Email Address <span style="color: var(--danger);">*</span></label>
+            <input type="email" id="email" required placeholder="name@college.edu or hr@company.com">
+            <div class="field-error" id="emailError"></div>
           </div>
 
           <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" required placeholder="Enter your password">
+            <label for="password">Password <span style="color: var(--danger);">*</span></label>
+            <div style="position: relative;">
+              <input type="password" id="password" required placeholder="Enter your password" style="padding-right: 4.5rem;">
+              <button type="button" id="togglePasswordBtn" style="position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.8rem; color: var(--primary); font-weight: 600; cursor: pointer; padding: 0.25rem 0.5rem;">
+                Show
+              </button>
+            </div>
+            <div class="field-error" id="passwordError"></div>
           </div>
 
-          <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-            Sign In
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem; padding: 0.75rem;">
+            Sign In to Portal
           </button>
         </form>
 
         <!-- Quick Demo Credentials Box for Viva / Evaluators -->
-        <div style="margin-top: 1.5rem; padding: 1rem; background-color: var(--light-bg); border-radius: var(--radius-sm); border: 1px dashed var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
-          <strong style="color: var(--dark); display: block; margin-bottom: 0.25rem;">🔑 Default Placement Officer (Admin):</strong>
-          Email: <code style="color: var(--primary);">admin@portal.com</code><br>
-          Password: <code style="color: var(--primary);">Admin@123</code>
+        <div style="margin-top: 1.5rem; padding: 1rem; background-color: var(--light-bg); border-radius: var(--radius-sm); border: 1px dashed var(--border-color); font-size: 0.82rem; color: var(--text-muted);">
+          <strong style="color: var(--dark); display: block; margin-bottom: 0.25rem;">🔑 Placement Officer (Admin Default):</strong>
+          Email: <code style="color: var(--primary); font-weight: 600;">admin@portal.com</code><br>
+          Password: <code style="color: var(--primary); font-weight: 600;">Admin@123</code>
         </div>
 
         <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
@@ -59,15 +64,24 @@
 
   <!-- Footer -->
   <footer>
-    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal.</p>
+    <p>© 2026 Apex Placement Portal — Training &amp; Placement Cell.</p>
   </footer>
 
   <script src="app.js"></script>
   <script>
+    /**
+     * login.html script
+     * -----------------
+     * Handles credentials submission, JWT token storage, 403 pending approval detection,
+     * and role-based dashboard redirection:
+     * - student   -> student.html
+     * - recruiter -> company.html
+     * - admin     -> admin.html
+     */
     document.addEventListener('DOMContentLoaded', () => {
       renderNavbar('login');
 
-      // If user is already logged in, redirect to their role dashboard
+      // If user is already authenticated with valid token, redirect directly
       const existingUser = getUser();
       const token = getToken();
       if (existingUser && token) {
@@ -76,54 +90,98 @@
         else if (existingUser.role === 'admin') window.location.href = 'admin.html';
       }
 
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+      const submitBtn = document.getElementById('submitBtn');
+
+      // Password visibility toggle
+      togglePasswordBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        togglePasswordBtn.textContent = isPassword ? 'Hide' : 'Show';
+      });
+
+      // Clear field errors as user types
+      emailInput.addEventListener('input', () => clearFieldError('email'));
+      passwordInput.addEventListener('input', () => clearFieldError('password'));
+
       document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        hideMessage('loginMsg');
+        clearAllFieldErrors(e.target);
+        const loginMsg = document.getElementById('loginMsg');
+        loginMsg.style.display = 'none';
 
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const submitBtn = document.getElementById('submitBtn');
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Signing in...';
-
-        const res = await apiCall('/auth/login', 'POST', { email, password });
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
-
-        if (!res.ok) {
-          if (res.status === 403) {
-            // Unapproved company message
-            showMessage(
-              'loginMsg',
-              '⏳ Account Pending Approval: Your company recruiter account has not been approved by the Placement Officer yet. Please contact the college placement cell.',
-              'error'
-            );
-          } else {
-            showMessage('loginMsg', res.message || 'Invalid email or password.', 'error');
-          }
-          return;
+        let hasError = false;
+        if (!email) {
+          setFieldError('email', 'Email address is required.');
+          hasError = true;
+        }
+        if (!password) {
+          setFieldError('password', 'Password is required.');
+          hasError = true;
         }
 
-        // Store JWT token and user info in localStorage
-        const { token, user } = res.data;
-        setAuth(token, user);
+        if (hasError) return;
 
-        showMessage('loginMsg', `Login successful! Welcome ${user.name}. Redirecting...`, 'success');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying credentials...';
 
-        // Redirect based on role
-        setTimeout(() => {
-          if (user.role === 'student') {
-            window.location.href = 'student.html';
-          } else if (user.role === 'recruiter') {
-            window.location.href = 'company.html';
-          } else if (user.role === 'admin') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'index.html';
+        try {
+          const res = await apiCall('/auth/login', 'POST', { email, password });
+
+          if (!res.ok) {
+            if (res.status === 403) {
+              // Explicitly highlight the 403 "pending approval" message for company recruiter accounts
+              loginMsg.className = 'msg-box msg-error';
+              loginMsg.style.display = 'block';
+              loginMsg.innerHTML = `
+                ⏳ <strong>Account Pending Approval:</strong> Your company recruiter account has not been approved by the Placement Officer yet. Please contact the college placement cell at <a href="mailto:placement@apex.edu" style="color: inherit; text-decoration: underline;">placement@apex.edu</a>.
+              `;
+              showToast('Account pending placement officer approval.', 'warning', 5000);
+            } else {
+              loginMsg.className = 'msg-box msg-error';
+              loginMsg.style.display = 'block';
+              loginMsg.textContent = res.message || 'Invalid email or password.';
+              showToast(res.message || 'Login failed. Check your credentials.', 'error');
+            }
+            return;
           }
-        }, 800);
+
+          // Store JWT token and user profile in browser localStorage
+          const { token, user } = res.data;
+          setAuth(token, user);
+
+          showToast(`Welcome back, ${user.name}!`, 'success', 2000);
+          loginMsg.className = 'msg-box msg-success';
+          loginMsg.style.display = 'block';
+          loginMsg.textContent = `Login successful! Redirecting to ${user.role} portal...`;
+
+          // Role-based redirect
+          setTimeout(() => {
+            if (user.role === 'student') {
+              window.location.href = 'student.html';
+            } else if (user.role === 'recruiter') {
+              window.location.href = 'company.html';
+            } else if (user.role === 'admin') {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'index.html';
+            }
+          }, 600);
+        } catch (err) {
+          console.error('Login submission exception:', err);
+          showToast('An unexpected error occurred during login.', 'error');
+          loginMsg.className = 'msg-box msg-error';
+          loginMsg.style.display = 'block';
+          loginMsg.textContent = 'An unexpected error occurred. Please check network connection.';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In to Portal';
+        }
       });
     });
   </script>

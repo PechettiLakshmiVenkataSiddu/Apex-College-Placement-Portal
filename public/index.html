@@ -3,28 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex College Placement Portal | Campus Recruitment Drives</title>
+  <title>Apex Placement Portal | Campus Recruitment Drives</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Navigation Bar: Dynamic based on session (renderNavbar in app.js) -->
   <nav class="navbar">
-    <div class="nav-container">
-      <!-- Populated dynamically by app.js renderNavbar() -->
-    </div>
+    <div class="nav-container"></div>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Main Container -->
   <main class="main-container">
 
     <!-- Hero Section -->
     <section class="hero-section">
-      <h1>Apex Institute of Technology</h1>
-      <p>Training & Placement Cell — Bridging academic excellence with global industry leaders. Explore active campus placement drives, verify student eligibility, and secure career opportunities.</p>
+      <h1>Apex Placement Portal</h1>
+      <p>Training &amp; Placement Cell — Connecting ambitious students with top corporate recruiters. Discover verified campus drives, transparent cutoffs, and equal opportunity placements.</p>
       <div class="hero-buttons" id="heroAuthButtons">
         <a href="login.html" class="btn btn-primary" style="background-color: #ffffff; color: var(--primary);">Login to Portal</a>
         <a href="register.html" class="btn btn-secondary" style="background-color: rgba(255,255,255,0.15); color: #ffffff; border-color: rgba(255,255,255,0.3);">Register Account</a>
+      </div>
+    </section>
+
+    <!-- Public Placement Stats Strip -->
+    <section class="public-stats-strip">
+      <div class="public-stat-box">
+        <div class="public-stat-val" id="statCompaniesVisiting">0</div>
+        <div class="public-stat-lbl">🏢 Companies Visiting</div>
+      </div>
+      <div class="public-stat-box">
+        <div class="public-stat-val" id="statDrivesOpen">0</div>
+        <div class="public-stat-lbl">💼 Open Campus Drives</div>
+      </div>
+      <div class="public-stat-box">
+        <div class="public-stat-val" id="statStudentsPlaced">0</div>
+        <div class="public-stat-lbl">🎓 Students Placed</div>
       </div>
     </section>
 
@@ -34,58 +48,72 @@
         <div class="highlight-icon">🏢</div>
         <div>
           <h3 style="font-size: 1.05rem; font-weight: 700;">Verified Companies</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">All visiting recruiters are verified and vetted by the college placement officer.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">All visiting recruiters are verified by the college placement officer before posting drives.</p>
         </div>
       </div>
       <div class="highlight-card">
         <div class="highlight-icon">🎯</div>
         <div>
           <h3 style="font-size: 1.05rem; font-weight: 700;">Transparent Cutoffs</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Clear eligibility criteria based on minimum CGPA, active backlogs, and branch.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Instant eligibility checking based on minimum CGPA, active backlogs, and department.</p>
         </div>
       </div>
       <div class="highlight-card">
         <div class="highlight-icon">📜</div>
         <div>
           <h3 style="font-size: 1.05rem; font-weight: 700;">One-Student-One-Offer</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Ensures equal placement opportunities for all graduating batch students.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Protects career opportunities by ensuring placed students cannot hoard multiple offers.</p>
         </div>
       </div>
     </section>
 
-    <!-- Campus Drives Section -->
-    <div class="page-header">
+    <!-- Campus Drives Section Header & Filters -->
+    <div id="drivesSection" class="page-header" style="flex-wrap: wrap; gap: 1rem; scroll-margin-top: 5rem;">
       <div>
-        <h2 class="page-title">Active Campus Recruitment Drives</h2>
-        <p class="page-subtitle">Browse open opportunities and company eligibility criteria</p>
+        <h2 class="page-title">Latest Campus Drives</h2>
+        <p class="page-subtitle">Browse active recruitment drives posted by approved partner companies</p>
       </div>
-      <div>
-        <input type="text" id="searchInput" placeholder="Search by job title or company..." style="max-width: 300px;">
+
+      <!-- Search & Filters Strip -->
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+        <input type="text" id="searchInput" placeholder="Search title or company..." style="width: 220px; padding: 0.55rem 0.85rem;">
+        <select id="locationFilter" style="width: 150px; padding: 0.55rem 0.85rem;">
+          <option value="">All Locations</option>
+        </select>
+        <select id="jobTypeFilter" style="width: 150px; padding: 0.55rem 0.85rem;">
+          <option value="">All Job Types</option>
+          <option value="Full-time">Full-time</option>
+          <option value="Internship">Internship</option>
+          <option value="Internship + PPO">Internship + PPO</option>
+        </select>
       </div>
     </div>
 
-    <!-- Alert / Message Container -->
-    <div id="homeMsg" class="msg-box"></div>
-
     <!-- Job Cards Grid -->
     <div id="jobsContainer" class="jobs-grid">
-      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
-        Loading campus drives...
-      </div>
+      <!-- Populated dynamically via JS -->
     </div>
 
   </main>
 
   <!-- Footer -->
   <footer>
-    <p>© 2026 Apex Institute of Technology - College Placement & Recruitment Portal. All rights reserved.</p>
+    <p>© 2026 Apex Placement Portal — Training &amp; Placement Cell. All rights reserved.</p>
   </footer>
 
   <script src="app.js"></script>
   <script>
+    /**
+     * index.html script
+     * -----------------
+     * Handles public landing view, live stats strip, filtering, and latest drives rendering.
+     */
+    let allJobs = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
       renderNavbar('home');
 
+      // Update hero CTA button if user is already signed in
       const user = getUser();
       if (user) {
         const heroAuth = document.getElementById('heroAuthButtons');
@@ -97,50 +125,81 @@
         `;
       }
 
-      await loadJobs();
+      // Load live stats and campus drives
+      await Promise.all([loadPublicStats(), loadCampusDrives()]);
 
-      // Search filter listener
-      document.getElementById('searchInput').addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        filterJobs(query);
-      });
+      // Set up filter event listeners
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('locationFilter').addEventListener('change', applyFilters);
+      document.getElementById('jobTypeFilter').addEventListener('change', applyFilters);
     });
 
-    let allJobs = [];
+    /**
+     * Load public stats strip (companies visiting, open drives, placed students)
+     */
+    const loadPublicStats = async () => {
+      try {
+        const res = await apiCall('/jobs/public/stats');
+        if (res.ok && res.data) {
+          document.getElementById('statCompaniesVisiting').textContent = res.data.companiesVisiting || 0;
+          document.getElementById('statDrivesOpen').textContent = res.data.drivesOpen || 0;
+          document.getElementById('statStudentsPlaced').textContent = res.data.studentsPlaced || 0;
+        }
+      } catch (e) {
+        console.error('Failed to load stats:', e);
+      }
+    };
 
-    const loadJobs = async () => {
-      const res = await apiCall('/jobs');
+    /**
+     * Fetch all active campus jobs from GET /api/jobs
+     */
+    const loadCampusDrives = async () => {
       const container = document.getElementById('jobsContainer');
+      showLoading(container, 'Loading latest campus drives...');
+
+      const res = await apiCall('/jobs');
 
       if (!res.ok || !res.data || res.data.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: #fff; border-radius: 10px; border: 1px solid var(--border-color);">
-            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
-            <h3 style="font-weight: 700; color: var(--dark);">No Active Campus Drives Currently</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.35rem;">Approved companies will post campus recruitment drives here soon.</p>
-          </div>
-        `;
+        container.innerHTML = getEmptyStateHtml('💼', 'No drives yet', 'There are no active campus recruitment drives right now. Please check back soon!');
         return;
       }
 
       allJobs = res.data;
+
+      // Populate unique locations in dropdown
+      const locationSelect = document.getElementById('locationFilter');
+      const uniqueLocations = [...new Set(allJobs.map(j => j.location).filter(Boolean))];
+      uniqueLocations.sort().forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        locationSelect.appendChild(opt);
+      });
+
       renderJobCards(allJobs);
     };
 
+    /**
+     * Renders job cards with NEW badge for drives posted within the last 7 days
+     */
     const renderJobCards = (jobs) => {
       const container = document.getElementById('jobsContainer');
       const user = getUser();
 
       if (jobs.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
-            No campus drives match your search query.
-          </div>
-        `;
+        container.innerHTML = getEmptyStateHtml('🔍', 'No matching drives', 'Try adjusting your search criteria or filters.');
         return;
       }
 
+      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+
       container.innerHTML = jobs.map(job => {
+        // Check if posted within 7 days
+        const jobDate = job.created_at ? new Date(job.created_at).getTime() : 0;
+        const isNew = (now - jobDate) <= SEVEN_DAYS_MS;
+
+        // Navigation button target
         const applyBtnAction = user && user.role === 'student'
           ? `student.html#drives`
           : (user ? `${user.role === 'recruiter' ? 'company.html' : 'admin.html'}` : 'login.html');
@@ -149,33 +208,39 @@
           ? 'Apply in Student Portal →'
           : (user ? 'View Dashboard →' : 'Login to Apply →');
 
+        const pkgDisplay = formatPackage(job.package_lpa, job.salary);
+
         return `
           <div class="job-card">
             <div class="job-card-header">
-              <span class="job-company">${escapeHtml(job.company)}</span>
-              <h3 class="job-title">${escapeHtml(job.title)}</h3>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+                <span class="job-company">${escapeHtml(job.company)}</span>
+                ${isNew ? '<span class="badge-new">✨ NEW</span>' : ''}
+              </div>
+              <h3 class="job-title" style="margin-top: 0.35rem;">${escapeHtml(job.title)}</h3>
               <div class="job-meta">
                 <span class="job-meta-item">📍 ${escapeHtml(job.location)}</span>
                 <span class="job-meta-item">💼 ${escapeHtml(job.job_type)}</span>
-                <span class="job-meta-item">💰 ${escapeHtml(job.salary || 'Best in Industry')}</span>
+                <span class="job-meta-item">💰 ${escapeHtml(pkgDisplay)}</span>
+                ${job.positions ? `<span class="job-meta-item">👥 ${job.positions} position(s)</span>` : ''}
               </div>
             </div>
 
             <div class="job-criteria-box">
               <div class="job-criteria-item">
-                <span style="color: var(--text-muted);">Minimum CGPA:</span>
+                <span style="color: var(--text-muted);">Min CGPA:</span>
                 <strong style="color: var(--dark);">${job.min_cgpa ? Number(job.min_cgpa).toFixed(2) : 'No Cutoff'}</strong>
               </div>
               <div class="job-criteria-item">
                 <span style="color: var(--text-muted);">Max Backlogs:</span>
-                <strong style="color: var(--dark);">${job.max_backlogs !== null ? job.max_backlogs : 'No Limit'}</strong>
+                <strong style="color: var(--dark);">${job.max_backlogs !== null ? job.max_backlogs : 'None'}</strong>
               </div>
               <div class="job-criteria-item">
-                <span style="color: var(--text-muted);">Branches:</span>
+                <span style="color: var(--text-muted);">Eligible Branches:</span>
                 <strong style="color: var(--dark); text-align: right; max-width: 60%;">${escapeHtml(job.allowed_departments || 'All Branches')}</strong>
               </div>
               <div class="job-criteria-item">
-                <span style="color: var(--text-muted);">Deadline:</span>
+                <span style="color: var(--text-muted);">Last Date:</span>
                 <strong style="color: var(--danger);">${formatDate(job.deadline)}</strong>
               </div>
             </div>
@@ -188,23 +253,30 @@
       }).join('');
     };
 
-    const filterJobs = (query) => {
-      const filtered = allJobs.filter(job => 
-        (job.title && job.title.toLowerCase().includes(query)) ||
-        (job.company && job.company.toLowerCase().includes(query)) ||
-        (job.location && job.location.toLowerCase().includes(query))
-      );
-      renderJobCards(filtered);
-    };
+    /**
+     * Filter drives by search text, location, and job type
+     */
+    const applyFilters = () => {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const selectedLocation = document.getElementById('locationFilter').value.toLowerCase().trim();
+      const selectedType = document.getElementById('jobTypeFilter').value.toLowerCase().trim();
 
-    const escapeHtml = (str) => {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      const filtered = allJobs.filter(job => {
+        const matchesQuery = !query || 
+          (job.title && job.title.toLowerCase().includes(query)) ||
+          (job.company && job.company.toLowerCase().includes(query)) ||
+          (job.description && job.description.toLowerCase().includes(query));
+
+        const matchesLocation = !selectedLocation || 
+          (job.location && job.location.toLowerCase().includes(selectedLocation));
+
+        const matchesType = !selectedType || 
+          (job.job_type && job.job_type.toLowerCase() === selectedType);
+
+        return matchesQuery && matchesLocation && matchesType;
+      });
+
+      renderJobCards(filtered);
     };
   </script>
 </body>

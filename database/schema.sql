@@ -68,6 +68,9 @@ CREATE TABLE IF NOT EXISTS jobs (
     location TEXT NOT NULL,
     salary TEXT,
     job_type TEXT NOT NULL,           -- e.g. 'Full-time', 'Internship'
+    package_lpa NUMERIC(10,2),        -- Package in LPA
+    positions INTEGER DEFAULT 1,      -- Number of vacancies / positions
+    selection_process TEXT,           -- Rounds: e.g. 'Aptitude, Technical, HR'
     min_cgpa NUMERIC(3,2) DEFAULT 0,  -- Minimum CGPA required
     max_backlogs INTEGER DEFAULT 0,   -- Maximum active backlogs permitted
     allowed_departments TEXT,         -- Comma-separated: 'CSE, IT, ECE' (empty = all)
@@ -80,6 +83,7 @@ CREATE INDEX IF NOT EXISTS idx_jobs_recruiter_id ON jobs(recruiter_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_is_active ON jobs(is_active);
 CREATE INDEX IF NOT EXISTS idx_jobs_deadline ON jobs(deadline);
 CREATE INDEX IF NOT EXISTS idx_jobs_min_cgpa ON jobs(min_cgpa);
+CREATE INDEX IF NOT EXISTS idx_jobs_package_lpa ON jobs(package_lpa);
 
 -- ----------------------------------------------------------------------------
 -- 4. APPLICATIONS TABLE
