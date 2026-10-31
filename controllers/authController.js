@@ -70,9 +70,13 @@ const register = async (req, res, next) => {
 
     // 5. Initialize an empty student_profile record for students
     if (newUser.role === 'student') {
-      await supabase
-        .from('student_profiles')
-        .insert({ user_id: newUser.id });
+      try {
+        await supabase
+          .from('student_profiles')
+          .upsert({ user_id: newUser.id, is_verified: false }, { onConflict: 'user_id' });
+      } catch (err) {
+        console.error('Failed to initialize student profile:', err);
+      }
     }
 
     const message = userRole === 'recruiter'

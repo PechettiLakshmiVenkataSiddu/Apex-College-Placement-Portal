@@ -489,7 +489,16 @@ if (isConfigured) {
           };
           table.push(row);
         }
-        return { data: row, error: null };
+
+        let augmented = { ...row };
+        if (this.tableName === 'student_profiles') {
+          const user = getTable('users').find((u) => u.id === row.user_id);
+          if (user) {
+            const { password, ...userSafe } = user;
+            augmented.users = userSafe;
+          }
+        }
+        return { data: augmented, error: null };
       }
 
       // 3. Filter matching rows
@@ -502,7 +511,20 @@ if (isConfigured) {
         matchedRows.forEach((row) => {
           Object.assign(row, this.payload);
         });
-        const updated = matchedRows.map((r) => ({ ...r }));
+        let updated = matchedRows.map((r) => ({ ...r }));
+        if (typeof this.columns === 'string') {
+          updated = updated.map((row) => {
+            const augmented = { ...row };
+            if (this.tableName === 'student_profiles') {
+              const user = getTable('users').find((u) => u.id === row.user_id);
+              if (user) {
+                const { password, ...userSafe } = user;
+                augmented.users = userSafe;
+              }
+            }
+            return augmented;
+          });
+        }
         return { data: updated.length === 1 ? updated[0] : updated, error: null };
       }
 

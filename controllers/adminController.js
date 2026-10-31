@@ -233,25 +233,30 @@ const verifyStudent = async (req, res, next) => {
 
     let targetUserId = id;
 
+    // If no existing profile found, auto-create/upsert one for this student
     if (!existingProfile) {
-      // Also try matching by profile id
-      const { data: profileById } = await supabase
+      const { data: createdProfile, error: upsertError } = await supabase
         .from('student_profiles')
+        .upsert({
+          user_id: targetUserId,
+          is_verified: true,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' })
         .select('*, users(id, name, email)')
-        .eq('id', id)
         .maybeSingle();
 
-      if (!profileById) {
-        return res.status(404).json({
-          success: false,
-          message: 'Student profile not found.',
-          data: null
-        });
+      if (upsertError) {
+        return next(upsertError);
       }
-      targetUserId = profileById.user_id;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Student academic profile verified successfully by Placement Officer.',
+        data: createdProfile
+      });
     }
 
-    // Mark as verified
+    // Mark existing profile as verified
     const { data: updatedProfile, error: updateError } = await supabase
       .from('student_profiles')
       .update({
