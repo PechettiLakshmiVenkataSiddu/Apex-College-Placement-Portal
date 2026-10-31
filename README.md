@@ -1,4 +1,4 @@
-# ðŸŽ“ College Placement & Recruitment Portal - Backend API
+#College Placement & Recruitment Portal - Backend API
 
 A complete, beginner-friendly RESTful backend API built with **Node.js**, **Express.js**, and **Supabase (PostgreSQL)** for managing on-campus recruitment drives in a college.
 
@@ -6,7 +6,7 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## ðŸ“‹ Table of Contents
+## Table of Contents
 1. [Core Roles & Workflow](#-core-roles--workflow)
 2. [Tech Stack](#-tech-stack)
 3. [Project Structure](#-project-structure)
@@ -20,7 +20,7 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## ðŸ‘¥ Core Roles & Workflow
+## Core Roles & Workflow
 
 1. **Student**:
    - Registers account and completes academic profile (roll number, course, department, current year, CGPA, backlogs, skills, resume).
@@ -45,7 +45,7 @@ Companies visit the college to recruit students, the **College Placement Officer
 
 ---
 
-## ðŸš€ Tech Stack
+## Tech Stack
 
 | Technology | Purpose | Why We Chose It |
 | :--- | :--- | :--- |
