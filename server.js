@@ -80,7 +80,12 @@ const healthHandler = (req, res) => {
     message: 'Server is running smoothly',
     data: {
       timestamp: new Date().toISOString(),
-      uptime: process.uptime()
+      uptime: process.uptime(),
+      databaseMode: isSupabaseConfigured ? 'CONNECTED_TO_CLOUD_SUPABASE' : 'TEMPORARY_IN_MEMORY_MOCK',
+      persistentStorage: isSupabaseConfigured,
+      hint: isSupabaseConfigured
+        ? 'Persistent database active. Data is permanently saved in Supabase PostgreSQL.'
+        : 'Running in temporary memory (RAM). When the browser refreshes or server restarts, in-memory data resets. Connect Supabase in Vercel Environment Variables to persist data permanently.'
     }
   });
 };
