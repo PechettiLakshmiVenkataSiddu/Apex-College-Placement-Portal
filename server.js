@@ -21,7 +21,7 @@ const dotenv = require('dotenv');
 // Load environment variables before importing configuration
 dotenv.config();
 
-const { testSupabaseConnection } = require('./config/supabase');
+const { testSupabaseConnection, isSupabaseConfigured } = require('./config/supabase');
 
 // Import route modules
 const authRoutes = require('./routes/authRoutes');
